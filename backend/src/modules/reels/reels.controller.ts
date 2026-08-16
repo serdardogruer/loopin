@@ -52,4 +52,11 @@ export class ReelsController {
     );
     return { success: true, data };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/share')
+  async shareReel(@Param('id') id: string, @Request() req: any) {
+    const data = await this.reelsService.shareReel(id, req.user.id);
+    return { success: true, data };
+  }
 }

@@ -81,11 +81,12 @@ export const AppHeader: React.FC = () => {
           </svg>
         </button>
 
-        {/* Notifications */}
+        {/* Notifications with Red Count Badge */}
         <button
           className="relative flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
           aria-label="Bildirimler"
           onClick={openNotifications}
+          title="Bildirimler"
         >
           <svg
             width="16"
@@ -100,8 +101,11 @@ export const AppHeader: React.FC = () => {
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 border border-[#0A0A0A] text-white text-[10px] font-black flex items-center justify-center shadow-lg shadow-red-500/50 animate-pulse">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </button>
 
         {/* Settings / Auth Profile Button */}

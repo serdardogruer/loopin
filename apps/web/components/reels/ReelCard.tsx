@@ -88,7 +88,8 @@ export const ReelCard: React.FC<ReelCardProps> = ({ reel, isFirstCard }) => {
           className="side-action-btn"
           onClick={(e) => {
             e.stopPropagation();
-            alert(`@${reel.publisherUsername} paylaştığı reel bağlantısı kopyalandı!`);
+            reelsService.shareReel(reel.id).catch(() => {});
+            alert(`🔗 @${reel.publisherUsername} adlı kullanıcının paylaşım bağlantısı kopyalandı ve paylaşıldı!`);
           }}
         >
           <div className="btn-icon-circle">

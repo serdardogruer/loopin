@@ -28,4 +28,10 @@ export const reelsService = {
       body: JSON.stringify({ text }),
     });
   },
+
+  async shareReel(id: string): Promise<any> {
+    return apiClient(`/reels/${id}/share`, {
+      method: 'POST',
+    });
+  },
 };
