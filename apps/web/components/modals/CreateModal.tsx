@@ -45,12 +45,17 @@ export const CreateModal: React.FC = () => {
 
   const handleReelSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const publisherId = user?.id || `usr-${Date.now()}`;
+    const publisherName = user?.name || 'Kullanıcı';
+    const publisherUsername = user?.username || '@kullanici';
+    const publisherAvatar = user?.avatarUrl || '/assets/profile_avatar.png';
+
     addReel({
       id: `reel-${Date.now()}`,
-      publisherId: user.id,
-      publisherName: user.name,
-      publisherUsername: user.username,
-      publisherAvatar: user.avatarUrl,
+      publisherId,
+      publisherName,
+      publisherUsername,
+      publisherAvatar,
       caption: reelCaption,
       mediaUrl: reelPreview || '/assets/reel_nature.png',
       mediaType: 'IMAGE',
@@ -74,6 +79,11 @@ export const CreateModal: React.FC = () => {
       formattedDate = `${d.getDate()} ${months[d.getMonth()]}, ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     }
 
+    const hostId = user?.id || `usr-${Date.now()}`;
+    const hostName = user?.name || 'Kullanıcı';
+    const hostUsername = user?.username || '@kullanici';
+    const hostAvatar = user?.avatarUrl || '/assets/profile_avatar.png';
+
     addEvent({
       id: `evt-${Date.now()}`,
       title: eventTitle,
@@ -87,10 +97,10 @@ export const CreateModal: React.FC = () => {
       price: eventPrice,
       imageUrl: eventPreview || '/assets/event_concert.png',
       description: eventDesc,
-      hostId: user.id,
-      hostName: user.name,
-      hostUsername: user.username,
-      hostAvatar: user.avatarUrl,
+      hostId,
+      hostName,
+      hostUsername,
+      hostAvatar,
       hostTrustScore: '%100 Güven Skoru',
       likeCount: 0,
       commentCount: 0,
@@ -99,10 +109,10 @@ export const CreateModal: React.FC = () => {
       attendees: [
         {
           id: `att-${Date.now()}`,
-          userId: user.id,
-          name: user.name,
-          username: user.username,
-          avatarUrl: user.avatarUrl,
+          userId: hostId,
+          name: hostName,
+          username: hostUsername,
+          avatarUrl: hostAvatar,
           joinedAt: new Date().toISOString(),
         },
       ],

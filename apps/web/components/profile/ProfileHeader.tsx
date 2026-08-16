@@ -7,13 +7,35 @@ import { useReelsStore } from '../../stores/useReelsStore';
 import { useUIStore } from '../../stores/useUIStore';
 
 export const ProfileHeader: React.FC = () => {
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { events } = useEventsStore();
   const { reels } = useReelsStore();
-  const { openEditProfileModal } = useUIStore();
+  const { openEditProfileModal, openSettingsModal, openAuthModal } = useUIStore();
 
-  const userReelsCount = reels.filter((r) => r.isSelf || r.publisherId === user.id).length;
-  const userEventsCount = events.filter((e) => e.hostName === user.name || e.isJoined).length;
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="p-6 bg-[#141414] border-b border-white/10 text-center space-y-4">
+        <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl mx-auto">
+          👤
+        </div>
+        <div>
+          <h3 className="text-base font-bold text-white font-['Outfit']">Henüz Giriş Yapmadınız</h3>
+          <p className="text-xs text-neutral-400 mt-1">
+            Profilinizi görüntülemek, etkinlik oluşturmak ve mesajlaşmak için lütfen giriş yapın.
+          </p>
+        </div>
+        <button
+          onClick={() => openAuthModal('login')}
+          className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-500/25"
+        >
+          Giriş Yap / Kayıt Ol
+        </button>
+      </div>
+    );
+  }
+
+  const userReelsCount = reels.filter((r) => r.isSelf || (user?.id && r.publisherId === user.id)).length;
+  const userEventsCount = events.filter((e) => (user?.name && e.hostName === user.name) || e.isJoined).length;
 
   return (
     <div className="p-4 bg-[#141414] border-b border-white/10 flex flex-col gap-3">
@@ -40,8 +62,10 @@ export const ProfileHeader: React.FC = () => {
             <div className="text-[10px] text-neutral-400">Etkinlik</div>
           </div>
           <div>
-            <div className="text-base font-bold text-white font-['Outfit']">1.4K</div>
-            <div className="text-[10px] text-neutral-400">Takipçi</div>
+            <div className="text-base font-bold text-white font-['Outfit']">
+              {user.creditBalance ?? 10}
+            </div>
+            <div className="text-[10px] text-indigo-400 font-semibold">Kredi</div>
           </div>
         </div>
       </div>
@@ -56,8 +80,10 @@ export const ProfileHeader: React.FC = () => {
             </span>
           )}
         </div>
-        <div className="text-xs text-neutral-400 font-medium">{user.username}</div>
-        <p className="text-xs text-neutral-300 leading-relaxed pt-1">{user.bio}</p>
+        <div className="text-xs text-neutral-400 font-medium">@{user.username || user.email}</div>
+        <p className="text-xs text-neutral-300 leading-relaxed pt-1">
+          {user.bio || 'Henüz bir biyografi eklenmedi.'}
+        </p>
       </div>
 
       {/* Badges */}
@@ -79,7 +105,7 @@ export const ProfileHeader: React.FC = () => {
           Profili Düzenle
         </button>
         <button
-          onClick={() => alert('⚙️ Ayarlar: Hesap, Gizlilik, Bildirimler ve Güvenlik ayarları aktiftir.')}
+          onClick={openSettingsModal}
           className="p-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 hover:text-white border border-white/10 active:scale-95"
           title="Ayarlar"
         >

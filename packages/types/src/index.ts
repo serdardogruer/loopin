@@ -14,6 +14,7 @@ export interface User {
   role: UserRole;
   trustScore: number;
   badgeTitle?: string | null;
+  creditBalance?: number;
   createdAt: string | Date;
   updatedAt: string | Date;
 }

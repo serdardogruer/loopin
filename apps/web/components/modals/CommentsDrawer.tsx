@@ -20,7 +20,10 @@ export const CommentsDrawer: React.FC = () => {
     if (e) e.preventDefault();
     if (!commentInput.trim()) return;
 
-    addComment(activeCommentsEventId, commentInput.trim(), user.name, user.avatarUrl || undefined);
+    const userName = user?.name || 'Kullanıcı';
+    const userAvatar = user?.avatarUrl || undefined;
+
+    addComment(activeCommentsEventId, commentInput.trim(), userName, userAvatar);
     setCommentInput('');
   };
 
@@ -80,7 +83,7 @@ export const CommentsDrawer: React.FC = () => {
         {/* Input Bar */}
         <form onSubmit={handleSend} className="pt-2 border-t border-white/10 flex items-center gap-2">
           <img
-            src={user.avatarUrl || '/assets/profile_avatar.png'}
+            src={user?.avatarUrl || '/assets/profile_avatar.png'}
             alt="User"
             className="w-8 h-8 rounded-full object-cover border border-white/10"
           />

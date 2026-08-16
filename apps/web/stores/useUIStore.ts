@@ -3,6 +3,7 @@ import { EventItem, ReelItem } from '@loopin/types';
 
 export type MainTab = 'home' | 'reels' | 'messages' | 'profile';
 export type ProfileSubTab = 'reels' | 'events';
+export type AuthModalMode = 'login' | 'register';
 
 interface UIState {
   currentTab: MainTab;
@@ -29,6 +30,22 @@ interface UIState {
   activeCommentsEventId: string | null;
   openCommentsDrawer: (eventId: string) => void;
   closeCommentsDrawer: () => void;
+
+  // Auth Modal
+  isAuthModalOpen: boolean;
+  authModalMode: AuthModalMode;
+  openAuthModal: (mode?: AuthModalMode) => void;
+  closeAuthModal: () => void;
+
+  // Settings Modal
+  isSettingsModalOpen: boolean;
+  openSettingsModal: () => void;
+  closeSettingsModal: () => void;
+
+  // Notifications Drawer
+  isNotificationsOpen: boolean;
+  openNotifications: () => void;
+  closeNotifications: () => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -53,4 +70,17 @@ export const useUIStore = create<UIState>((set) => ({
   activeCommentsEventId: null,
   openCommentsDrawer: (eventId) => set({ activeCommentsEventId: eventId }),
   closeCommentsDrawer: () => set({ activeCommentsEventId: null }),
+
+  isAuthModalOpen: false,
+  authModalMode: 'login',
+  openAuthModal: (mode = 'login') => set({ isAuthModalOpen: true, authModalMode: mode }),
+  closeAuthModal: () => set({ isAuthModalOpen: false }),
+
+  isSettingsModalOpen: false,
+  openSettingsModal: () => set({ isSettingsModalOpen: true }),
+  closeSettingsModal: () => set({ isSettingsModalOpen: false }),
+
+  isNotificationsOpen: false,
+  openNotifications: () => set({ isNotificationsOpen: true }),
+  closeNotifications: () => set({ isNotificationsOpen: false }),
 }));

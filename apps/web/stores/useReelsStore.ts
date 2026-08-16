@@ -4,6 +4,7 @@ import { initialMockReels } from '../mock';
 
 interface ReelsState {
   reels: ReelItem[];
+  setReels: (reels: ReelItem[]) => void;
   toggleLike: (id: string) => void;
   toggleFollow: (publisherId: string) => void;
   addReel: (reel: ReelItem) => void;
@@ -11,6 +12,7 @@ interface ReelsState {
 
 export const useReelsStore = create<ReelsState>((set) => ({
   reels: initialMockReels,
+  setReels: (reels) => set({ reels }),
 
   toggleLike: (id) =>
     set((state) => ({

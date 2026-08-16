@@ -10,7 +10,9 @@ export const ProfileMediaGrid: React.FC = () => {
   const { user } = useAuthStore();
   const { openDetailModal } = useUIStore();
 
-  const selfReels = reels.filter((r) => r.isSelf || r.publisherId === user.id);
+  const selfReels = user
+    ? reels.filter((r) => r.isSelf || (user.id && r.publisherId === user.id))
+    : [];
 
   if (selfReels.length === 0) {
     return (

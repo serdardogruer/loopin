@@ -4,6 +4,7 @@ import { initialMockEvents } from '../mock';
 
 interface EventsState {
   events: EventItem[];
+  setEvents: (events: EventItem[]) => void;
   toggleLike: (id: string) => void;
   toggleJoin: (id: string, currentUserName?: string, currentUserAvatar?: string) => void;
   addComment: (eventId: string, text: string, userName: string, userAvatar?: string) => void;
@@ -12,6 +13,7 @@ interface EventsState {
 
 export const useEventsStore = create<EventsState>((set) => ({
   events: initialMockEvents,
+  setEvents: (events) => set({ events }),
 
   toggleLike: (id) =>
     set((state) => ({

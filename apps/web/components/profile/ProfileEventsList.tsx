@@ -10,9 +10,9 @@ export const ProfileEventsList: React.FC = () => {
   const { user } = useAuthStore();
   const { openDetailModal } = useUIStore();
 
-  const userEvents = events.filter(
-    (e) => e.hostName === user.name || e.isJoined || e.hostId === user.id
-  );
+  const userEvents = user
+    ? events.filter((e) => (user.name && e.hostName === user.name) || e.isJoined || (user.id && e.hostId === user.id))
+    : [];
 
   if (userEvents.length === 0) {
     return (
@@ -25,7 +25,7 @@ export const ProfileEventsList: React.FC = () => {
   return (
     <div className="p-3 space-y-2">
       {userEvents.map((event) => {
-        const isOwner = event.hostName === user.name || event.hostId === user.id;
+        const isOwner = user ? (event.hostName === user.name || event.hostId === user.id) : false;
 
         return (
           <div

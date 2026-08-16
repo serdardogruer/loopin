@@ -1,9 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useUIStore } from '../stores/useUIStore';
 import { useEventsStore } from '../stores/useEventsStore';
 import { useReelsStore } from '../stores/useReelsStore';
+import { useAuthStore } from '../stores/useAuthStore';
+import { eventsService } from '../services/events.service';
+import { reelsService } from '../services/reels.service';
 
 import { AppHeader } from '../components/navigation/AppHeader';
 import { BottomNavbar } from '../components/navigation/BottomNavbar';
@@ -19,11 +22,40 @@ import { CreateModal } from '../components/modals/CreateModal';
 import { EditProfileModal } from '../components/modals/EditProfileModal';
 import { EventDetailModal } from '../components/events/EventDetailModal';
 import { CommentsDrawer } from '../components/modals/CommentsDrawer';
+import { AuthModal } from '../components/modals/AuthModal';
+import { SettingsModal } from '../components/modals/SettingsModal';
+import { NotificationsDrawer } from '../components/modals/NotificationsDrawer';
 
 export default function AppHomePage() {
   const { currentTab, currentProfileSubTab, setCurrentProfileSubTab } = useUIStore();
-  const { events } = useEventsStore();
-  const { reels } = useReelsStore();
+  const { events, setEvents } = useEventsStore();
+  const { reels, setReels } = useReelsStore();
+  const { checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+
+    // Fetch live feed from PostgreSQL backend
+    eventsService.getFeed()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setEvents(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Live events feed fallback:', err);
+      });
+
+    reelsService.getFeed()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setReels(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Live reels feed fallback:', err);
+      });
+  }, []);
 
   return (
     <div className="device-mockup">
@@ -103,6 +135,9 @@ export default function AppHomePage() {
       <EditProfileModal />
       <EventDetailModal />
       <CommentsDrawer />
+      <AuthModal />
+      <SettingsModal />
+      <NotificationsDrawer />
     </div>
   );
 }

@@ -8,10 +8,10 @@ export const EditProfileModal: React.FC = () => {
   const { isEditProfileModalOpen, closeEditProfileModal } = useUIStore();
   const { user, updateUserProfile } = useAuthStore();
 
-  const [name, setName] = useState(user.name);
-  const [username, setUsername] = useState(user.username.replace(/^@/, ''));
-  const [bio, setBio] = useState(user.bio || '');
-  const [avatarPreview, setAvatarPreview] = useState(user.avatarUrl || '/assets/profile_avatar.png');
+  const [name, setName] = useState(user?.name || '');
+  const [username, setUsername] = useState(user?.username ? user.username.replace(/^@/, '') : '');
+  const [bio, setBio] = useState(user?.bio || '');
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || '/assets/profile_avatar.png');
 
   if (!isEditProfileModalOpen) return null;
 
