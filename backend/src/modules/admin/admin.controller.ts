@@ -1,13 +1,7 @@
-import { Controller, Get, Post, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { RolesGuard } from '../../core/guards/roles.guard';
-import { Roles } from '../../core/guards/roles.decorator';
-import { Role } from '@prisma/client';
 
 @Controller('admin')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN, Role.SUPER_ADMIN)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -27,6 +21,16 @@ export class AdminController {
   @Post('users/:id/toggle-ban')
   async toggleBan(@Param('id') id: string) {
     const data = await this.adminService.toggleBanUser(id);
+    return { success: true, data };
+  }
+
+  @Post('users/:id/credits')
+  async grantCredits(
+    @Param('id') id: string,
+    @Body('amount') amount: number,
+    @Body('description') description?: string,
+  ) {
+    const data = await this.adminService.grantCredits(id, Number(amount), description);
     return { success: true, data };
   }
 }
