@@ -45,6 +45,6 @@ coverage/
 *.sql
 *.dump
 dumps/
-uploads/
+/uploads/
 .env*
 !.env.example
