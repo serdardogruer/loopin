@@ -6,7 +6,7 @@ import { useEventsStore } from '../../stores/useEventsStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 
 export const CommentsDrawer: React.FC = () => {
-  const { activeCommentsEventId, closeCommentsDrawer } = useUIStore();
+  const { activeCommentsEventId, closeCommentsDrawer, openProfileSheet } = useUIStore();
   const { events, addComment } = useEventsStore();
   const { user } = useAuthStore();
   const [commentInput, setCommentInput] = useState('');
@@ -59,14 +59,34 @@ export const CommentsDrawer: React.FC = () => {
           ) : (
             comments.map((c) => (
               <div key={c.id} className="flex items-start gap-2.5">
-                <img
-                  src={c.userAvatar || '/assets/profile_avatar.png'}
-                  alt={c.userName}
-                  className="w-8 h-8 rounded-full object-cover border border-white/10 flex-shrink-0"
-                />
+                <div
+                  onClick={() => {
+                    if (c.userId) {
+                      closeCommentsDrawer();
+                      openProfileSheet(c.userId);
+                    }
+                  }}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <img
+                    src={c.userAvatar || '/assets/profile_avatar.png'}
+                    alt={c.userName}
+                    className="w-8 h-8 rounded-full object-cover border border-white/10 flex-shrink-0"
+                  />
+                </div>
                 <div className="flex-1 min-w-0 bg-[#0A0A0A] p-2.5 rounded-2xl border border-white/5">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-white truncate">{c.userName}</span>
+                    <span
+                      onClick={() => {
+                        if (c.userId) {
+                          closeCommentsDrawer();
+                          openProfileSheet(c.userId);
+                        }
+                      }}
+                      className="text-xs font-bold text-white truncate cursor-pointer hover:text-indigo-300"
+                    >
+                      {c.userName}
+                    </span>
                     <span className="text-[10px] text-neutral-500">
                       {typeof c.createdAt === 'string' && c.createdAt.includes('T')
                         ? new Date(c.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })

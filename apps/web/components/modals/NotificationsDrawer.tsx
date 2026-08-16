@@ -117,7 +117,22 @@ export const NotificationsDrawer: React.FC = () => {
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <div className="font-bold text-xs text-white">{n.title}</div>
+                  <div
+                    onClick={(e) => {
+                      const targetUserId = n.data?.applicantId || n.data?.followerId || n.data?.likerId;
+                      if (targetUserId) {
+                        e.stopPropagation();
+                        closeNotifications();
+                        useUIStore.getState().openProfileSheet(targetUserId);
+                      }
+                    }}
+                    className="font-bold text-xs text-white hover:text-indigo-300 cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{n.title}</span>
+                    {(n.data?.applicantId || n.data?.followerId) && (
+                      <span className="text-[10px] text-indigo-400">👁️</span>
+                    )}
+                  </div>
                   <div className="text-[10px] text-neutral-400 whitespace-nowrap">
                     {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>

@@ -26,7 +26,7 @@ export const FollowersModal: React.FC<FollowersModalProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuthStore();
   const { openChatWithUser } = useChatStore();
-  const { setCurrentTab } = useUIStore();
+  const { setCurrentTab, openProfileSheet } = useUIStore();
 
   useEffect(() => {
     if (isOpen) {
@@ -150,14 +150,23 @@ export const FollowersModal: React.FC<FollowersModalProps> = ({
                 key={item.id}
                 className="flex items-center justify-between p-2.5 rounded-2xl bg-[#0A0A0A] border border-white/5 hover:border-white/10 transition-colors"
               >
-                <div className="flex items-center gap-2.5">
+                <div
+                  onClick={() => {
+                    onClose();
+                    openProfileSheet(item.id);
+                  }}
+                  className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
+                >
                   <img
                     src={item.avatarUrl || '/assets/profile_avatar.png'}
                     alt={item.name}
                     className="w-10 h-10 rounded-full object-cover border border-white/10"
                   />
                   <div>
-                    <div className="text-xs font-bold text-white">{item.name}</div>
+                    <div className="text-xs font-bold text-white flex items-center gap-1">
+                      <span>{item.name}</span>
+                      <span className="text-[10px] text-indigo-400">👁️</span>
+                    </div>
                     <div className="text-[10px] text-neutral-400">{item.username}</div>
                   </div>
                 </div>

@@ -13,7 +13,7 @@ export interface ReelCardProps {
 
 export const ReelCard: React.FC<ReelCardProps> = ({ reel, isFirstCard }) => {
   const { toggleLike, toggleFollow } = useReelsStore();
-  const { openCommentsDrawer } = useUIStore();
+  const { openCommentsDrawer, openProfileSheet } = useUIStore();
 
   return (
     <div className="reel-card">
@@ -116,12 +116,20 @@ export const ReelCard: React.FC<ReelCardProps> = ({ reel, isFirstCard }) => {
       {/* Caption and Publisher Overlay */}
       <div className="card-content-overlay">
         <div className="reel-user-row">
-          <img
-            src={reel.publisherAvatar || '/assets/profile_avatar.png'}
-            alt={reel.publisherName}
-            className="reel-avatar"
-          />
-          <span className="reel-username">{reel.publisherName}</span>
+          <div
+            onClick={() => reel.publisherId && openProfileSheet(reel.publisherId)}
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            <img
+              src={reel.publisherAvatar || '/assets/profile_avatar.png'}
+              alt={reel.publisherName}
+              className="reel-avatar"
+            />
+            <span className="reel-username flex items-center gap-1">
+              {reel.publisherName}
+              <span className="text-[10px] text-indigo-400">👁️</span>
+            </span>
+          </div>
           {!reel.isSelf && (
             <button
               className="reel-follow-btn"

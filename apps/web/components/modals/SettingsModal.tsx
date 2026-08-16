@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useDiscoveryStore } from '../../stores/useDiscoveryStore';
 
 export const SettingsModal: React.FC = () => {
   const { isSettingsModalOpen, closeSettingsModal, openEditProfileModal, openAuthModal } = useUIStore();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const { openDiscoveryModal, settings } = useDiscoveryStore();
 
   const [pushEnabled, setPushEnabled] = useState(true);
   const [messagesEnabled, setMessagesEnabled] = useState(true);
@@ -34,7 +36,7 @@ export const SettingsModal: React.FC = () => {
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-lg font-bold font-['Outfit'] text-white">⚙️ Ayarlar & Tercihler</h2>
-          <p className="text-xs text-neutral-400 mt-1">Hesap, bildirim ve gizlilik seçenekleri</p>
+          <p className="text-xs text-neutral-400 mt-1">Hesap, keşif, bildirim ve gizlilik seçenekleri</p>
         </div>
 
         {isAuthenticated && user ? (
@@ -64,6 +66,33 @@ export const SettingsModal: React.FC = () => {
               >
                 Düzenle
               </button>
+            </div>
+
+            {/* Discovery Settings Trigger */}
+            <div className="space-y-3">
+              <div className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
+                🧭 Keşif Tercihleri
+              </div>
+              <div
+                onClick={() => {
+                  closeSettingsModal();
+                  openDiscoveryModal();
+                }}
+                className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-900/30 to-purple-900/30 border border-indigo-500/30 flex items-center justify-between cursor-pointer hover:border-indigo-500/60 transition-all"
+              >
+                <div>
+                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span>📍 Keşif Ayarları</span>
+                    <span className="text-[10px] text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full font-semibold">
+                      {settings.maxDistanceKm} km / {settings.minAge}-{settings.maxAge} yaş
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-neutral-300 mt-0.5">
+                    Mesafe, yaş aralığı, cinsiyet ve konum filtrelerini ayarla
+                  </div>
+                </div>
+                <span className="text-indigo-400 text-base font-bold">›</span>
+              </div>
             </div>
 
             {/* Notification Preferences */}

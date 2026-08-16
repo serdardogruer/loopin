@@ -5,6 +5,7 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import { useEventsStore } from '../../stores/useEventsStore';
 import { useReelsStore } from '../../stores/useReelsStore';
 import { useUIStore } from '../../stores/useUIStore';
+import { useDiscoveryStore } from '../../stores/useDiscoveryStore';
 import { FollowersModal } from '../modals/FollowersModal';
 
 export const ProfileHeader: React.FC = () => {
@@ -152,6 +153,13 @@ export const ProfileHeader: React.FC = () => {
           className="flex-1 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-xs font-bold shadow-md shadow-indigo-500/20 active:scale-95"
         >
           Profili Düzenle
+        </button>
+        <button
+          onClick={() => useDiscoveryStore.getState().openDiscoveryModal()}
+          className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-neutral-200 text-xs font-bold border border-white/10 flex items-center gap-1 active:scale-95 transition-all"
+          title="Keşif Ayarları"
+        >
+          <span>🧭</span> Keşif Ayarları
         </button>
         <button
           onClick={openSettingsModal}

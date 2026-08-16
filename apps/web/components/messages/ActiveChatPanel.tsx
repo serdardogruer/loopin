@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useChatStore } from '../../stores/useChatStore';
+import { useUIStore } from '../../stores/useUIStore';
 
 export const ActiveChatPanel: React.FC = () => {
   const { activeChat, messages, closeChat, sendMessage, isLoadingMessages } = useChatStore();
+  const { openProfileSheet } = useUIStore();
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -18,6 +20,12 @@ export const ActiveChatPanel: React.FC = () => {
     if (!inputText.trim()) return;
     sendMessage(inputText.trim());
     setInputText('');
+  };
+
+  const handleOpenProfile = () => {
+    if (activeChat.participantId) {
+      openProfileSheet(activeChat.participantId);
+    }
   };
 
   return (
@@ -44,19 +52,27 @@ export const ActiveChatPanel: React.FC = () => {
             </svg>
           </button>
 
-          <img
-            src={activeChat.participantAvatar || '/assets/profile_avatar.png'}
-            alt={activeChat.participantName}
-            className="w-9 h-9 rounded-full object-cover border border-white/10"
-          />
+          {/* Clickable Avatar & Name -> Opens Profile Sheet */}
+          <div
+            onClick={handleOpenProfile}
+            className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
+            title="Profili Gör"
+          >
+            <img
+              src={activeChat.participantAvatar || '/assets/profile_avatar.png'}
+              alt={activeChat.participantName}
+              className="w-9 h-9 rounded-full object-cover border border-white/10"
+            />
 
-          <div>
-            <h4 className="text-sm font-bold text-white font-['Outfit'] leading-tight">
-              {activeChat.participantName}
-            </h4>
-            <span className="text-[10px] text-emerald-400 font-medium">
-              {activeChat.participantUsername}
-            </span>
+            <div>
+              <h4 className="text-sm font-bold text-white font-['Outfit'] leading-tight flex items-center gap-1">
+                <span>{activeChat.participantName}</span>
+                <span className="text-[10px] text-indigo-400">👁️</span>
+              </h4>
+              <span className="text-[10px] text-emerald-400 font-medium">
+                {activeChat.participantUsername}
+              </span>
+            </div>
           </div>
         </div>
 
