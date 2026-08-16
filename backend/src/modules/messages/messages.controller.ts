@@ -30,6 +30,19 @@ export class MessagesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('start')
+  async startConversation(
+    @Request() req: any,
+    @Body('recipientId') recipientId: string,
+  ) {
+    const data = await this.messagesService.getOrCreateConversation(
+      req.user.id,
+      recipientId,
+    );
+    return { success: true, data };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   async sendMessage(@Request() req: any, @Body() body: any) {
     const validated = SendMessageSchema.parse(body);

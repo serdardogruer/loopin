@@ -1,61 +1,54 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { useAuthStore } from '../../stores/useAuthStore';
-
-interface NotificationItem {
-  id: string;
-  title: string;
-  body: string;
-  timeAgo: string;
-  isRead: boolean;
-  type: 'application' | 'like' | 'message' | 'system';
-}
+import { useNotificationsStore } from '../../stores/useNotificationsStore';
+import { usersService } from '../../services/users.service';
 
 export const NotificationsDrawer: React.FC = () => {
   const { isNotificationsOpen, closeNotifications, openAuthModal } = useUIStore();
   const { isAuthenticated } = useAuthStore();
+  const {
+    notifications,
+    unreadCount,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    approveApplication,
+    rejectApplication,
+  } = useNotificationsStore();
 
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: '1',
-      title: 'Başvuru Onaylandı 🎉',
-      body: 'Kadıköy Akustik Kahve & Canlı Müzik etkinliğine katılımınız onaylandı!',
-      timeAgo: '10 dk önce',
-      isRead: false,
-      type: 'application',
-    },
-    {
-      id: '2',
-      title: 'Yeni Başvuru Alındı 📨',
-      body: 'Mert Demir "Boğazda Gün Batımı Fotoğrafçılık" etkinliğinize katılmak istiyor.',
-      timeAgo: '45 dk önce',
-      isRead: false,
-      type: 'application',
-    },
-    {
-      id: '3',
-      title: 'Paylaşımınız Beğenildi ❤️',
-      body: 'Selin Kaya Belgrad Ormanı Doğa Yürüyüşü reel videonuzu beğendi.',
-      timeAgo: '2 saat önce',
-      isRead: true,
-      type: 'like',
-    },
-    {
-      id: '4',
-      title: 'Hoş Geldiniz ♾️',
-      body: 'Loopin V2 topluluğuna katıldığınız için 10 kredi hesabınıza tanımlandı.',
-      timeAgo: 'Dün',
-      isRead: true,
-      type: 'system',
-    },
-  ]);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isNotificationsOpen && isAuthenticated) {
+      fetchNotifications();
+    }
+  }, [isNotificationsOpen, isAuthenticated]);
 
   if (!isNotificationsOpen) return null;
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  const handleApprove = async (applicationId: string, notificationId: string) => {
+    setActionLoadingId(notificationId);
+    await approveApplication(applicationId, notificationId);
+    setActionLoadingId(null);
+  };
+
+  const handleReject = async (applicationId: string, notificationId: string) => {
+    setActionLoadingId(notificationId);
+    await rejectApplication(applicationId, notificationId);
+    setActionLoadingId(null);
+  };
+
+  const handleFollowBack = async (targetId: string, notificationId: string) => {
+    try {
+      await usersService.toggleFollow(targetId);
+      markAsRead(notificationId);
+      alert('Kullanıcıyı geri takip ettiniz! ✨');
+    } catch (err: any) {
+      alert(err.message || 'İşlem başarısız');
+    }
   };
 
   return (
@@ -66,17 +59,21 @@ export const NotificationsDrawer: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="text-xl">🔔</span>
             <h3 className="font-bold text-white text-sm font-['Outfit']">Bildirimler</h3>
-            <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-bold">
-              {notifications.filter((n) => !n.isRead).length}
-            </span>
+            {unreadCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-bold">
+                {unreadCount}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={markAllAsRead}
-              className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold"
-            >
-              Tümünü Oku
-            </button>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllAsRead}
+                className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold"
+              >
+                Tümünü Oku
+              </button>
+            )}
             <button
               onClick={closeNotifications}
               className="text-neutral-400 hover:text-white p-1 text-sm ml-2"
@@ -112,6 +109,7 @@ export const NotificationsDrawer: React.FC = () => {
             notifications.map((n) => (
               <div
                 key={n.id}
+                onClick={() => !n.isRead && markAsRead(n.id)}
                 className={`p-3.5 rounded-2xl border transition-colors ${
                   n.isRead
                     ? 'bg-[#1A2234] border-white/5 text-neutral-400'
@@ -120,9 +118,52 @@ export const NotificationsDrawer: React.FC = () => {
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <div className="font-bold text-xs text-white">{n.title}</div>
-                  <div className="text-[10px] text-neutral-400 whitespace-nowrap">{n.timeAgo}</div>
+                  <div className="text-[10px] text-neutral-400 whitespace-nowrap">
+                    {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
                 </div>
                 <div className="text-xs text-neutral-300 leading-snug">{n.body}</div>
+
+                {/* Application Approval Actions */}
+                {n.type === 'APPLICATION_RECEIVED' && n.data?.applicationId && (
+                  <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-white/10">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleApprove(n.data!.applicationId!, n.id);
+                      }}
+                      disabled={actionLoadingId === n.id}
+                      className="flex-1 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow active:scale-95 disabled:opacity-50"
+                    >
+                      Onayla ✅
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReject(n.data!.applicationId!, n.id);
+                      }}
+                      disabled={actionLoadingId === n.id}
+                      className="flex-1 py-1.5 rounded-xl bg-red-600/30 hover:bg-red-600/50 text-red-300 border border-red-500/30 text-[11px] font-bold shadow active:scale-95 disabled:opacity-50"
+                    >
+                      Reddet ❌
+                    </button>
+                  </div>
+                )}
+
+                {/* Follow Back Action */}
+                {n.type === 'NEW_FOLLOWER' && n.data?.followerId && (
+                  <div className="mt-3 pt-2 border-t border-white/10 flex justify-end">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFollowBack(n.data!.followerId!, n.id);
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-[11px] font-bold shadow active:scale-95"
+                    >
+                      Geri Takip Et ✨
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}

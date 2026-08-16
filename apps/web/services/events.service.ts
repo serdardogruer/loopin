@@ -28,9 +28,34 @@ export const eventsService = {
     });
   },
 
-  async toggleJoin(id: string): Promise<{ joined: boolean }> {
-    return apiClient<{ joined: boolean }>(`/events/${id}/join`, {
+  async toggleJoin(id: string): Promise<any> {
+    return apiClient<any>(`/events/${id}/join`, {
       method: 'POST',
+    });
+  },
+
+  async apply(id: string, note?: string): Promise<{ status: string; message: string; applicationId?: string }> {
+    return apiClient<{ status: string; message: string; applicationId?: string }>(`/events/${id}/apply`, {
+      method: 'POST',
+      body: JSON.stringify({ note }),
+    });
+  },
+
+  async approveApplication(applicationId: string): Promise<{ success: boolean; message: string }> {
+    return apiClient<{ success: boolean; message: string }>(`/events/applications/${applicationId}/approve`, {
+      method: 'POST',
+    });
+  },
+
+  async rejectApplication(applicationId: string): Promise<{ success: boolean; message: string }> {
+    return apiClient<{ success: boolean; message: string }>(`/events/applications/${applicationId}/reject`, {
+      method: 'POST',
+    });
+  },
+
+  async getApplications(eventId: string): Promise<any[]> {
+    return apiClient<any[]>(`/events/${eventId}/applications`, {
+      method: 'GET',
     });
   },
 

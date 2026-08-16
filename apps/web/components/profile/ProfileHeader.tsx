@@ -1,16 +1,20 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useEventsStore } from '../../stores/useEventsStore';
 import { useReelsStore } from '../../stores/useReelsStore';
 import { useUIStore } from '../../stores/useUIStore';
+import { FollowersModal } from '../modals/FollowersModal';
 
 export const ProfileHeader: React.FC = () => {
   const { user, isAuthenticated } = useAuthStore();
   const { events } = useEventsStore();
   const { reels } = useReelsStore();
   const { openEditProfileModal, openSettingsModal, openAuthModal } = useUIStore();
+
+  const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
+  const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following'>('followers');
 
   if (!isAuthenticated || !user) {
     return (
@@ -37,6 +41,11 @@ export const ProfileHeader: React.FC = () => {
   const userReelsCount = reels.filter((r) => r.isSelf || (user?.id && r.publisherId === user.id)).length;
   const userEventsCount = events.filter((e) => (user?.name && e.hostName === user.name) || e.isJoined).length;
 
+  const openFollowers = (tab: 'followers' | 'following') => {
+    setFollowersModalTab(tab);
+    setIsFollowersModalOpen(true);
+  };
+
   return (
     <div className="p-4 bg-[#141414] border-b border-white/10 flex flex-col gap-3">
       {/* Top Row: Avatar & Stats */}
@@ -52,20 +61,26 @@ export const ProfileHeader: React.FC = () => {
           </span>
         </div>
 
-        <div className="flex items-center gap-6 text-center">
+        <div className="flex items-center gap-4 text-center">
+          <button
+            onClick={() => openFollowers('followers')}
+            className="hover:opacity-80 transition-opacity"
+          >
+            <div className="text-sm font-bold text-white font-['Outfit']">Takipçiler</div>
+            <div className="text-[10px] text-indigo-400 font-semibold">Bağlantılar</div>
+          </button>
+          <button
+            onClick={() => openFollowers('following')}
+            className="hover:opacity-80 transition-opacity"
+          >
+            <div className="text-sm font-bold text-white font-['Outfit']">Takip</div>
+            <div className="text-[10px] text-neutral-400">Edilenler</div>
+          </button>
           <div>
-            <div className="text-base font-bold text-white font-['Outfit']">{userReelsCount}</div>
-            <div className="text-[10px] text-neutral-400">Paylaşım</div>
-          </div>
-          <div>
-            <div className="text-base font-bold text-white font-['Outfit']">{userEventsCount}</div>
-            <div className="text-[10px] text-neutral-400">Etkinlik</div>
-          </div>
-          <div>
-            <div className="text-base font-bold text-white font-['Outfit']">
-              {user.creditBalance ?? 10}
+            <div className="text-sm font-bold text-amber-400 font-['Outfit']">
+              {user.creditBalance ?? 10} 🪙
             </div>
-            <div className="text-[10px] text-indigo-400 font-semibold">Kredi</div>
+            <div className="text-[10px] text-amber-400 font-semibold">Kredi</div>
           </div>
         </div>
       </div>
@@ -86,13 +101,16 @@ export const ProfileHeader: React.FC = () => {
         </p>
       </div>
 
-      {/* Badges */}
+      {/* Badges & Counters */}
       <div className="flex flex-wrap items-center gap-2 pt-1">
         <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] text-neutral-300 font-medium flex items-center gap-1">
           <span>🛡️</span> %98 Güven Skoru
         </span>
         <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] text-neutral-300 font-medium flex items-center gap-1">
-          <span>🏆</span> Süper Organizatör
+          <span>🎉</span> {userEventsCount} Etkinlik
+        </span>
+        <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] text-neutral-300 font-medium flex items-center gap-1">
+          <span>📷</span> {userReelsCount} Reel
         </span>
       </div>
 
@@ -124,6 +142,17 @@ export const ProfileHeader: React.FC = () => {
           </svg>
         </button>
       </div>
+
+      {/* Followers / Following Modal */}
+      {isFollowersModalOpen && (
+        <FollowersModal
+          isOpen={isFollowersModalOpen}
+          initialTab={followersModalTab}
+          targetUserId={user.id}
+          targetUsername={user.name}
+          onClose={() => setIsFollowersModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

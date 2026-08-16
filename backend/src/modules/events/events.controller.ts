@@ -52,6 +52,38 @@ export class EventsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post(':id/apply')
+  async applyToEvent(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body('note') note?: string,
+  ) {
+    const data = await this.eventsService.applyToEvent(id, req.user.id, note);
+    return { success: true, data };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('applications/:id/approve')
+  async approveApplication(@Param('id') id: string, @Request() req: any) {
+    const data = await this.eventsService.approveApplication(id, req.user.id);
+    return { success: true, data };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('applications/:id/reject')
+  async rejectApplication(@Param('id') id: string, @Request() req: any) {
+    const data = await this.eventsService.rejectApplication(id, req.user.id);
+    return { success: true, data };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/applications')
+  async getEventApplications(@Param('id') id: string, @Request() req: any) {
+    const data = await this.eventsService.getEventApplications(id, req.user.id);
+    return { success: true, data };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post(':id/comments')
   async addComment(
     @Param('id') id: string,

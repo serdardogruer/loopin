@@ -10,6 +10,7 @@ import { ReelsModule } from './modules/reels/reels.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { CreditsModule } from './modules/credits/credits.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { HealthModule } from './modules/health/health.module';
 
@@ -29,6 +30,7 @@ import { HealthModule } from './modules/health/health.module';
     EventsModule,
     ReelsModule,
     MessagesModule,
+    NotificationsModule,
     CreditsModule,
     UploadsModule,
     AdminModule,

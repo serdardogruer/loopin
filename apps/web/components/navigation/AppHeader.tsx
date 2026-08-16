@@ -3,10 +3,12 @@
 import React from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useNotificationsStore } from '../../stores/useNotificationsStore';
 
 export const AppHeader: React.FC = () => {
   const { setCurrentTab, openNotifications, openSettingsModal, openAuthModal } = useUIStore();
   const { isAuthenticated, user } = useAuthStore();
+  const { unreadCount } = useNotificationsStore();
 
   return (
     <header className="app-header">

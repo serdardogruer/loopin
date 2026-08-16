@@ -158,6 +158,61 @@ export class MessagesService {
     };
   }
 
+  async getOrCreateConversation(userId: string, recipientId: string) {
+    const existing = await this.prisma.conversation.findFirst({
+      where: {
+        isGroup: false,
+        AND: [
+          { participants: { some: { userId } } },
+          { participants: { some: { userId: recipientId } } },
+        ],
+      },
+      include: {
+        participants: {
+          include: { user: { include: { profile: true } } },
+        },
+      },
+    });
+
+    if (existing) {
+      const other = existing.participants.find((p) => p.userId !== userId)?.user;
+      return {
+        id: existing.id,
+        participantId: other?.id || recipientId,
+        participantName: other?.profile?.name || 'Kullanıcı',
+        participantUsername: `@${other?.profile?.username || 'user'}`,
+        participantAvatar: other?.profile?.avatarUrl,
+        unreadCount: 0,
+      };
+    }
+
+    const newConv = await this.prisma.conversation.create({
+      data: {
+        isGroup: false,
+        participants: {
+          createMany: {
+            data: [{ userId }, { userId: recipientId }],
+          },
+        },
+      },
+      include: {
+        participants: {
+          include: { user: { include: { profile: true } } },
+        },
+      },
+    });
+
+    const other = newConv.participants.find((p) => p.userId !== userId)?.user;
+    return {
+      id: newConv.id,
+      participantId: other?.id || recipientId,
+      participantName: other?.profile?.name || 'Kullanıcı',
+      participantUsername: `@${other?.profile?.username || 'user'}`,
+      participantAvatar: other?.profile?.avatarUrl,
+      unreadCount: 0,
+    };
+  }
+
   private formatTime(date: Date) {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');

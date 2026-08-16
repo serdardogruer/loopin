@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { UpdateProfileInput } from '@loopin/validation';
+import { NotificationType } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async getProfile(usernameOrId: string, currentUserId?: string) {
     const cleanUsername = usernameOrId.toLowerCase().replace(/^@/, '');
@@ -27,6 +32,7 @@ export class UsersService {
           include: { likes: true, comments: true },
         },
         followers: true,
+        following: true,
       },
     });
 
@@ -50,6 +56,7 @@ export class UsersService {
         reelsCount: user.reels.length,
         eventsCount: user.hostedEvents.length,
         followersCount: user.followers.length,
+        followingCount: user.following.length,
       },
       reels: user.reels.map((r) => ({
         id: r.id,
@@ -101,5 +108,143 @@ export class UsersService {
       avatarUrl: updated.avatarUrl,
       bio: updated.bio,
     };
+  }
+
+  /**
+   * Toggle Follow / Unfollow with Notifications
+   */
+  async toggleFollow(currentUserId: string, targetUserId: string) {
+    if (currentUserId === targetUserId) {
+      throw new BadRequestException('Kendinizi takip edemezsiniz.');
+    }
+
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+      include: { profile: true },
+    });
+    if (!targetUser) throw new NotFoundException('Kullanıcı bulunamadı');
+
+    const existingFollow = await this.prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: currentUserId,
+          followingId: targetUserId,
+        },
+      },
+    });
+
+    if (existingFollow) {
+      await this.prisma.follow.delete({
+        where: { id: existingFollow.id },
+      });
+      const followerCount = await this.prisma.follow.count({
+        where: { followingId: targetUserId },
+      });
+      return { isFollowing: false, followerCount };
+    } else {
+      await this.prisma.follow.create({
+        data: {
+          followerId: currentUserId,
+          followingId: targetUserId,
+        },
+      });
+
+      // Send NEW_FOLLOWER Notification
+      const followerUser = await this.prisma.user.findUnique({
+        where: { id: currentUserId },
+        include: { profile: true },
+      });
+      const followerName = followerUser?.profile?.name || 'Bir kullanıcı';
+      const followerUsername = `@${followerUser?.profile?.username || 'user'}`;
+      const followerAvatar = followerUser?.profile?.avatarUrl;
+
+      await this.notificationsService.createNotification(
+        targetUserId,
+        NotificationType.NEW_FOLLOWER,
+        'Yeni Takipçi ✨',
+        `${followerName} (${followerUsername}) sizi takip etmeye başladı.`,
+        {
+          followerId: currentUserId,
+          followerUsername,
+          followerName,
+          followerAvatar,
+        },
+      );
+
+      const followerCount = await this.prisma.follow.count({
+        where: { followingId: targetUserId },
+      });
+
+      return { isFollowing: true, followerCount };
+    }
+  }
+
+  /**
+   * Get list of followers for a user
+   */
+  async getFollowers(targetUserId: string, currentUserId?: string) {
+    const followers = await this.prisma.follow.findMany({
+      where: { followingId: targetUserId },
+      include: {
+        follower: {
+          include: { profile: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Check if current user is following each of them
+    const currentUserFollowing = currentUserId
+      ? await this.prisma.follow.findMany({
+          where: { followerId: currentUserId },
+          select: { followingId: true },
+        })
+      : [];
+    const followingSet = new Set(currentUserFollowing.map((f) => f.followingId));
+
+    return followers.map((f) => ({
+      id: f.follower.id,
+      name: f.follower.profile?.name || 'Kullanıcı',
+      username: `@${f.follower.profile?.username || 'user'}`,
+      avatarUrl: f.follower.profile?.avatarUrl,
+      bio: f.follower.profile?.bio,
+      trustScore: `%${f.follower.profile?.trustScore || 98} Güven Skoru`,
+      isFollowing: followingSet.has(f.follower.id),
+      isSelf: currentUserId === f.follower.id,
+    }));
+  }
+
+  /**
+   * Get list of users that target user is following
+   */
+  async getFollowing(targetUserId: string, currentUserId?: string) {
+    const following = await this.prisma.follow.findMany({
+      where: { followerId: targetUserId },
+      include: {
+        following: {
+          include: { profile: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const currentUserFollowing = currentUserId
+      ? await this.prisma.follow.findMany({
+          where: { followerId: currentUserId },
+          select: { followingId: true },
+        })
+      : [];
+    const followingSet = new Set(currentUserFollowing.map((f) => f.followingId));
+
+    return following.map((f) => ({
+      id: f.following.id,
+      name: f.following.profile?.name || 'Kullanıcı',
+      username: `@${f.following.profile?.username || 'user'}`,
+      avatarUrl: f.following.profile?.avatarUrl,
+      bio: f.following.profile?.bio,
+      trustScore: `%${f.following.profile?.trustScore || 98} Güven Skoru`,
+      isFollowing: followingSet.has(f.following.id),
+      isSelf: currentUserId === f.following.id,
+    }));
   }
 }

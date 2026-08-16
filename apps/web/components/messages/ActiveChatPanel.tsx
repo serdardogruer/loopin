@@ -4,21 +4,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useChatStore } from '../../stores/useChatStore';
 
 export const ActiveChatPanel: React.FC = () => {
-  const { conversations, activeChatId, setActiveChatId, sendMessage } = useChatStore();
+  const { activeChat, messages, closeChat, sendMessage, isLoadingMessages } = useChatStore();
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const activeChat = conversations.find((c) => c.id === activeChatId);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeChat?.messages]);
+  }, [messages]);
 
-  if (!activeChatId || !activeChat) return null;
+  if (!activeChat) return null;
 
   const handleSend = () => {
     if (!inputText.trim()) return;
-    sendMessage(activeChat.id, inputText.trim());
+    sendMessage(inputText.trim());
     setInputText('');
   };
 
@@ -28,7 +26,7 @@ export const ActiveChatPanel: React.FC = () => {
       <div className="h-14 px-3 bg-[#1A1A1A] border-b border-white/10 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setActiveChatId(null)}
+            onClick={closeChat}
             className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white"
           >
             <svg
@@ -57,13 +55,13 @@ export const ActiveChatPanel: React.FC = () => {
               {activeChat.participantName}
             </h4>
             <span className="text-[10px] text-emerald-400 font-medium">
-              {activeChat.isOnline ? 'Çevrimiçi' : activeChat.lastActiveText}
+              {activeChat.participantUsername}
             </span>
           </div>
         </div>
 
         <button
-          onClick={() => alert(`📞 ${activeChat.participantName} aranıyor...`)}
+          onClick={() => alert(`📞 ${activeChat.participantName} ile sesli arama yakında aktif olacaktır!`)}
           className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-neutral-300 hover:text-white"
         >
           <svg
@@ -83,31 +81,39 @@ export const ActiveChatPanel: React.FC = () => {
 
       {/* Messages Scroll Area */}
       <div className="flex-1 p-4 overflow-y-auto space-y-3">
-        {activeChat.messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex flex-col max-w-[78%] ${
-              msg.senderType === 'sent' ? 'ml-auto items-end' : 'mr-auto items-start'
-            }`}
-          >
+        {isLoadingMessages ? (
+          <div className="text-center py-10 text-xs text-neutral-500">Mesajlar yükleniyor...</div>
+        ) : messages.length === 0 ? (
+          <div className="text-center py-16 text-xs text-neutral-500 italic">
+            {activeChat.participantName} ile henüz bir konuşma geçmişiniz yok. İlk mesajı yazarak selam verin! 👋
+          </div>
+        ) : (
+          messages.map((msg) => (
             <div
-              className={`p-3 rounded-2xl text-xs leading-relaxed ${
-                msg.senderType === 'sent'
-                  ? 'bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-br-none shadow-md shadow-indigo-500/20'
-                  : 'bg-[#1E1E1E] text-neutral-200 border border-white/10 rounded-bl-none'
+              key={msg.id}
+              className={`flex flex-col max-w-[78%] ${
+                msg.senderType === 'sent' ? 'ml-auto items-end' : 'mr-auto items-start'
               }`}
             >
-              <span>{msg.text}</span>
               <div
-                className={`text-[9px] mt-1 text-right ${
-                  msg.senderType === 'sent' ? 'text-white/70' : 'text-neutral-500'
+                className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                  msg.senderType === 'sent'
+                    ? 'bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-br-none shadow-md shadow-indigo-500/20'
+                    : 'bg-[#1E1E1E] text-neutral-200 border border-white/10 rounded-bl-none'
                 }`}
               >
-                {new Date(msg.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                <span>{msg.text}</span>
+                <div
+                  className={`text-[9px] mt-1 text-right ${
+                    msg.senderType === 'sent' ? 'text-white/70' : 'text-neutral-500'
+                  }`}
+                >
+                  {msg.time || 'Şimdi'}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
         <div ref={messagesEndRef} />
       </div>
 

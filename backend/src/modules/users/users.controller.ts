@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Put,
+  Post,
   Body,
   Param,
   UseGuards,
@@ -26,6 +27,25 @@ export class UsersController {
   async updateProfile(@Request() req: any, @Body() body: any) {
     const validated = UpdateProfileSchema.parse(body);
     const data = await this.usersService.updateProfile(req.user.id, validated);
+    return { success: true, data };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/follow')
+  async toggleFollow(@Param('id') id: string, @Request() req: any) {
+    const data = await this.usersService.toggleFollow(req.user.id, id);
+    return { success: true, data };
+  }
+
+  @Get(':id/followers')
+  async getFollowers(@Param('id') id: string, @Request() req: any) {
+    const data = await this.usersService.getFollowers(id, req.user?.id);
+    return { success: true, data };
+  }
+
+  @Get(':id/following')
+  async getFollowing(@Param('id') id: string, @Request() req: any) {
+    const data = await this.usersService.getFollowing(id, req.user?.id);
     return { success: true, data };
   }
 }

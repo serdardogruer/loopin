@@ -7,14 +7,14 @@ import { useAuthStore } from '../../stores/useAuthStore';
 
 export const BottomNavbar: React.FC = () => {
   const { currentTab, setCurrentTab, openCreateModal } = useUIStore();
-  const { conversations, setActiveChatId } = useChatStore();
+  const { conversations, closeChat } = useChatStore();
   const { user } = useAuthStore();
 
   const unreadMessagesCount = conversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
 
   const handleTabClick = (tab: MainTab) => {
     if (tab === 'messages') {
-      setActiveChatId(null);
+      closeChat();
     }
     setCurrentTab(tab);
   };
