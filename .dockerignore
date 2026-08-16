@@ -1,0 +1,14 @@
+node_modules
+.pnpm-store
+.next
+dist
+build
+.git
+.gitignore
+*.log
+*.env*
+!.env.example
+coverage
+.turbo
+prototype/
+prototype.zip

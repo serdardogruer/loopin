@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loopin - Önce Etkinlik, Sonra Tanışma</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=6.0">
+</head>
+<body>
+
+  <!-- Background Ambient Glows -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Main Device Mockup Container -->
+  <div class="device-mockup">
+    
+    <!-- Phone Screen -->
+    <div class="app-screen">
+      
+      <!-- Top App Bar -->
+      <header class="app-header">
+        <div class="brand-logo" onclick="switchTab('home')">
+          <span class="infinity-symbol">♾️</span>
+          <span class="brand-name">Loopin</span>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn search-trigger" aria-label="Arama">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+          <button class="icon-btn notification-trigger" aria-label="Bildirimler">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="badge badge-pulse"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- App Main Content Container -->
+      <main class="app-content">
+
+        <!-- TAB 1: ANASAYFA (ETKİNLİKLER) -->
+        <section id="tab-home" class="tab-view active-view">
+          <div class="feed-container events-snap-feed" id="events-feed">
+            <!-- Dynamic Event Cards will be loaded here by JavaScript -->
+          </div>
+        </section>
+
+        <!-- TAB 2: REELS (FOTOĞRAF VE VİDEO) -->
+        <section id="tab-reels" class="tab-view">
+          <div class="feed-container reels-snap-feed" id="reels-feed">
+            <!-- Dynamic Reels will be loaded here by JavaScript -->
+          </div>
+        </section>
+
+        <!-- TAB 4: MESAJLAR -->
+        <section id="tab-messages" class="tab-view">
+          <div class="messages-container">
+            <div class="messages-header">
+              <h2>Mesajlar</h2>
+              <span class="online-indicator">3 Aktif</span>
+            </div>
+            
+            <!-- Chat List View -->
+            <div class="chat-list" id="chat-list-view">
+              <!-- Chat list items will be injected here -->
+            </div>
+
+            <!-- Active Chat View (Hidden by default, overlays Chat List) -->
+            <div class="active-chat-panel" id="active-chat-panel">
+              <div class="chat-panel-header">
+                <button class="icon-btn back-to-list-btn" id="chat-back-btn">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <div class="chat-user-info">
+                  <img src="" alt="" class="chat-avatar" id="chat-active-avatar">
+                  <div class="chat-user-details">
+                    <span class="chat-username" id="chat-active-name">Ece Yılmaz</span>
+                    <span class="chat-status" id="chat-active-status">Çevrimiçi</span>
+                  </div>
+                </div>
+                <button class="icon-btn call-btn">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                </button>
+              </div>
+              
+              <!-- Chat Messages Scroll Area -->
+              <div class="chat-messages-area" id="chat-messages-area">
+                <!-- Chat bubbles will go here -->
+              </div>
+              
+              <!-- Chat Input Bar -->
+              <div class="chat-input-bar">
+                <input type="text" id="chat-message-input" placeholder="Mesaj yazın..." autocomplete="off">
+                <button class="send-message-btn" id="send-message-btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: PROFİL -->
+        <section id="tab-profile" class="tab-view">
+          <div class="profile-container">
+            
+            <!-- Profile Info Header -->
+            <div class="profile-header-card">
+              <div class="profile-avatar-row">
+                <div class="avatar-wrapper">
+                  <img src="assets/profile_avatar.png" alt="Profil Resmi" class="profile-main-avatar">
+                  <span class="verified-badge">✓</span>
+                </div>
+                <div class="profile-stats">
+                  <div class="stat-box">
+                    <span class="stat-num" id="profile-reels-count">3</span>
+                    <span class="stat-label">Paylaşım</span>
+                  </div>
+                  <div class="stat-box">
+                    <span class="stat-num" id="profile-events-count">2</span>
+                    <span class="stat-label">Etkinlik</span>
+                  </div>
+                  <div class="stat-box">
+                    <span class="stat-num">1.4K</span>
+                    <span class="stat-label">Takipçi</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="profile-bio-row">
+                <h3 class="profile-name">Selin Kaya <span class="premium-badge">PRO</span></h3>
+                <span class="profile-username">@selinkaya</span>
+                <p class="profile-bio">Kupa bardakta kahve ☕, canlı konserler 🎸 ve doğa yürüyüşleri 🌲 vazgeçilmezim. Loopin ile yeni insanlarla tanışmayı seviyorum!</p>
+                <div class="profile-badges">
+                  <span class="tag-chip font-chip"><span class="chip-icon">🛡️</span> %98 Güven Skoru</span>
+                  <span class="tag-chip font-chip"><span class="chip-icon">🏆</span> Süper Organizatör</span>
+                </div>
+              </div>
+              
+              <div class="profile-actions">
+                <button class="btn btn-primary btn-sm flex-1" onclick="openEditProfileModal()">Profili Düzenle</button>
+                <button class="btn btn-secondary btn-sm" onclick="openSettingsModal()" aria-label="Ayarlar" title="Ayarlar">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Profile Nav Tabs -->
+            <div class="profile-tab-bar">
+              <button class="profile-tab-btn active-tab" onclick="switchProfileSubTab('reels')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                <span>Paylaşımlar</span>
+              </button>
+              <button class="profile-tab-btn" onclick="switchProfileSubTab('events')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>Etkinliklerim</span>
+              </button>
+            </div>
+
+            <!-- Profile SubTab Views -->
+            <div class="profile-tab-content">
+              <!-- Grid Layout for Reels -->
+              <div id="profile-subtab-reels" class="profile-subtab-view active-subtab">
+                <div class="media-grid" id="profile-media-grid">
+                  <!-- Injected via JavaScript -->
+                </div>
+              </div>
+              
+              <!-- List Layout for Events -->
+              <div id="profile-subtab-events" class="profile-subtab-view">
+                <div class="events-list" id="profile-events-list">
+                  <!-- Injected via JavaScript -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Bottom Tab Bar Navigation -->
+      <nav class="app-navbar">
+        <button class="nav-item active-nav" onclick="switchTab('home')" id="nav-btn-home" aria-label="Anasayfa">
+          <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="nav-label">Anasayfa</span>
+        </button>
+
+        <button class="nav-item" onclick="switchTab('reels')" id="nav-btn-reels" aria-label="Reels">
+          <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="m10 8 6 4-6 4V8z"></path></svg>
+          <span class="nav-label">Reel</span>
+        </button>
+
+        <button class="nav-item" onclick="openCreateModal()" id="nav-btn-create" aria-label="Oluştur">
+          <div class="nav-icon-wrapper">
+            <div class="nav-create-btn-circle">
+              <span class="plus-icon">+</span>
+            </div>
+          </div>
+          <span class="nav-label">Oluştur</span>
+        </button>
+
+        <button class="nav-item" onclick="switchTab('messages')" id="nav-btn-messages" aria-label="Mesajlar">
+          <div class="nav-icon-wrapper">
+            <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span class="nav-badge" id="messages-nav-badge"></span>
+          </div>
+          <span class="nav-label">Mesajlar</span>
+        </button>
+
+        <button class="nav-item" onclick="switchTab('profile')" id="nav-btn-profile" aria-label="Profil">
+          <img src="assets/profile_avatar.png" alt="Profil" class="nav-avatar" id="nav-btn-avatar">
+          <span class="nav-label">Profil</span>
+        </button>
+      </nav>
+
+      <!-- Edit Profile Modal (TikTok / Dark Style) -->
+      <div class="modal-overlay" id="edit-profile-modal" onclick="closeEditProfileModalOnOverlay(event)">
+        <div class="edit-profile-card" onclick="event.stopPropagation()">
+          
+          <!-- Modal Header -->
+          <div class="edit-profile-header">
+            <h2>Profili Düzenle</h2>
+            <button type="button" class="edit-profile-close-btn" onclick="closeEditProfileModal()" aria-label="Kapat">✕</button>
+          </div>
+
+          <!-- Modal Content Body -->
+          <form id="edit-profile-form" onsubmit="saveProfileChanges(event)">
+            
+            <!-- Row 1: Profil fotoğrafı -->
+            <div class="edit-profile-row">
+              <div class="edit-profile-label">Profil fotoğrafı</div>
+              <div class="edit-profile-field flex-center">
+                <div class="edit-avatar-container">
+                  <img src="assets/profile_avatar.png" alt="Profil Fotoğrafı" id="edit-avatar-preview" class="edit-avatar-img">
+                  <button type="button" class="edit-avatar-badge" onclick="triggerFileInput('edit-avatar-input')" aria-label="Fotoğraf Değiştir">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                  </button>
+                  <input type="file" id="edit-avatar-input" accept="image/*" class="hidden-input" onchange="previewEditAvatar(this)">
+                </div>
+              </div>
+            </div>
+
+            <div class="edit-profile-divider"></div>
+
+            <!-- Row 2: Kullanıcı Adı -->
+            <div class="edit-profile-row">
+              <div class="edit-profile-label">Kullanıcı Adı</div>
+              <div class="edit-profile-field">
+                <input type="text" id="edit-username-input" class="edit-input" value="selinkaya" oninput="updateEditUsernamePreview(this.value)">
+                <div class="edit-url-preview" id="edit-url-preview">www.loopin.app/@selinkaya</div>
+                <div class="edit-helper-text">
+                  Kullanıcı adları sadece harf, sayı, alt çizgi ve nokta içerebilir.<br>
+                  Kullanıcı adı değiştirilince profil bağlantısı da değişir.
+                </div>
+              </div>
+            </div>
+
+            <div class="edit-profile-divider"></div>
+
+            <!-- Row 3: İsim -->
+            <div class="edit-profile-row">
+              <div class="edit-profile-label">İsim</div>
+              <div class="edit-profile-field">
+                <input type="text" id="edit-name-input" class="edit-input" value="Selin Kaya">
+                <div class="edit-helper-text">
+                  Takma adınız 7 günde bir yalnızca bir kez değiştirilebilir.
+                </div>
+              </div>
+            </div>
+
+            <div class="edit-profile-divider"></div>
+
+            <!-- Row 4: Özgeçmiş -->
+            <div class="edit-profile-row">
+              <div class="edit-profile-label">Özgeçmiş</div>
+              <div class="edit-profile-field">
+                <textarea id="edit-bio-input" class="edit-textarea" placeholder="Özgeçmiş" maxlength="150" oninput="updateEditBioCounter(this.value)"></textarea>
+                <div class="edit-char-counter" id="edit-bio-counter">0/80</div>
+              </div>
+            </div>
+
+            <div class="edit-profile-divider"></div>
+
+            <!-- Modal Footer Actions -->
+            <div class="edit-profile-footer">
+              <button type="button" class="edit-btn edit-btn-cancel" onclick="closeEditProfileModal()">İptal</button>
+              <button type="submit" class="edit-btn edit-btn-save">Kaydet</button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom-Sheet Modal: Create Overlay -->
+  <div class="modal-overlay" id="create-modal" onclick="closeCreateModalOnOverlay(event)">
+    <div class="bottom-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-drag-handle"></div>
+      <div class="sheet-header">
+        <h3>Yeni Paylaşım Oluştur</h3>
+        <button class="close-modal-btn" onclick="closeCreateModal()">✕</button>
+      </div>
+      
+      <!-- Selection of Post Type -->
+      <div class="post-type-selector">
+        <button class="type-selector-btn active-type" onclick="toggleCreateType('reel')" id="type-btn-reel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          <span>Fotoğraf / Video (Reel)</span>
+        </button>
+        <button class="type-selector-btn" onclick="toggleCreateType('event')" id="type-btn-event">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span>Etkinlik</span>
+        </button>
+      </div>
+
+      <!-- CREATE FORM FOR REEL (PHOTO/VIDEO) -->
+      <form id="form-create-reel" class="create-form active-form" onsubmit="submitReel(event)">
+        <div class="form-group">
+          <label>Medya Seçin</label>
+          <div class="media-upload-area" onclick="triggerFileInput('reel-file')">
+            <input type="file" id="reel-file" accept="image/*,video/*" class="hidden-input" onchange="previewMedia(this, 'reel-preview-img')">
+            <div class="upload-placeholder" id="reel-upload-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <p>Dosya seçmek için tıklayın</p>
+              <span>Desteklenen: JPG, PNG, MP4</span>
+            </div>
+            <img src="" id="reel-preview-img" class="media-preview-img hidden-element" alt="Reel Önizleme">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reel-caption">Açıklama</label>
+          <textarea id="reel-caption" rows="3" placeholder="Reel hakkında bir şeyler yazın... Örneğin: 'Güneşin batışını izlerken harika bir an! 🌅'" required></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">İptal</button>
+          <button type="submit" class="btn btn-primary">Reel'de Paylaş</button>
+        </div>
+      </form>
+
+      <!-- CREATE FORM FOR EVENT -->
+      <form id="form-create-event" class="create-form" onsubmit="submitEvent(event)">
+        <div class="form-group">
+          <label>Kapak Görseli</label>
+          <div class="media-upload-area" onclick="triggerFileInput('event-file')">
+            <input type="file" id="event-file" accept="image/*" class="hidden-input" onchange="previewMedia(this, 'event-preview-img')">
+            <div class="upload-placeholder" id="event-upload-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              <p>Etkinlik kapak resmi yükle</p>
+              <span>Desteklenen: JPG, PNG</span>
+            </div>
+            <img src="" id="event-preview-img" class="media-preview-img hidden-element" alt="Etkinlik Önizleme">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="event-title">Etkinlik Başlığı</label>
+            <input type="text" id="event-title" placeholder="Konser, Kahve vb." required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="event-category">Kategori</label>
+            <select id="event-category">
+              <option value="Müzik & Konser">🎵 Müzik & Konser</option>
+              <option value="Kahve & Yemek">☕ Kahve & Yemek</option>
+              <option value="Doğa & Spor">🌲 Doğa & Spor</option>
+              <option value="Sinema & Kültür">🎬 Sinema & Kültür</option>
+              <option value="Teknoloji & Hobi">💻 Teknoloji & Hobi</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="event-date">Tarih & Saat</label>
+            <input type="datetime-local" id="event-date" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="event-location">Mekan / Konum</label>
+            <input type="text" id="event-location" placeholder="Örn: Starbucks, Beşiktaş" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="event-capacity">Kontenjan (Kişi)</label>
+            <input type="number" id="event-capacity" min="2" max="100" value="10" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="event-price">Bütçe / Ücret</label>
+            <select id="event-price">
+              <option value="Ücretsiz">Ücretsiz</option>
+              <option value="Herkes Kendi Öder">Herkes Kendi Öder</option>
+              <option value="Etkinlik Sahibi İkram Eder">Organizatör Öder</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="event-desc">Etkinlik Açıklaması</label>
+          <textarea id="event-desc" rows="3" placeholder="Etkinlik detayları, buluşma noktası vb." required></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">İptal</button>
+          <button type="submit" class="btn btn-primary">Ana Sayfada Paylaş</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Detail Lightbox Modal: Shows details of profile item when clicked -->
+  <div class="modal-overlay" id="detail-modal" onclick="closeDetailModal()">
+    <div class="detail-modal-card" onclick="event.stopPropagation()">
+      <button class="close-detail-btn" onclick="closeDetailModal()">✕</button>
+      <div id="detail-modal-content">
+        <!-- Injected via JS depending on what is clicked -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Sliding bottom-sheet Modal -->
+  <div class="modal-overlay" id="comments-drawer-modal" onclick="closeCommentsDrawerOnOverlay(event)">
+    <div class="bottom-sheet comments-bottom-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-drag-handle"></div>
+      <div class="sheet-header">
+        <h3>Yorumlar (<span id="drawer-comment-count">0</span>)</h3>
+        <button class="close-modal-btn" onclick="closeCommentsDrawer()">✕</button>
+      </div>
+      
+      <!-- Scrollable comments list -->
+      <div class="drawer-comments-list" id="drawer-comments-list">
+        <!-- Injected dynamically by JS -->
+      </div>
+      
+      <!-- Add comment input bar -->
+      <div class="drawer-comment-input-bar">
+        <img src="assets/profile_avatar.png" alt="Selin Kaya" class="drawer-comment-self-avatar">
+        <input type="text" id="drawer-new-comment-input" placeholder="Yorum ekle..." autocomplete="off">
+        <button class="send-comment-btn" id="drawer-send-comment-btn">Paylaş</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script File -->
+  <script src="app.js?v=3.0"></script>
+</body>
+</html>

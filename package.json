@@ -1,0 +1,26 @@
+{
+  "name": "loopin-monorepo",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Loopin V2 — Real-time Social Event & Activity Platform",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "db:generate": "pnpm --filter backend prisma generate",
+    "db:migrate": "pnpm --filter backend prisma migrate dev",
+    "db:push": "pnpm --filter backend prisma db push",
+    "db:seed": "pnpm --filter backend prisma db seed",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.3",
+    "typescript": "^5.4.5"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

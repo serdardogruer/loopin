@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Next.js Build Outputs
+.next/
+out/
+
+# NestJS Build Outputs
+dist/
+build/
+
+# Logs & Environment
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE & OS Files
+.DS_Store
+*.pem
+Thumbs.db
+.vscode/
+.idea/
+
+# Turborepo & Cache
+.turbo
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Coverage
+coverage/
+
+# Secrets & Dumps
+*.key
+*.pem
+*.sql
+*.dump
+dumps/
+uploads/
+.env*
+!.env.example

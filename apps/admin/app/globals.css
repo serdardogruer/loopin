@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #0B0F19;
+  --color-surface: #111827;
+  --color-primary: #6366F1;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: #F3F4F6;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
