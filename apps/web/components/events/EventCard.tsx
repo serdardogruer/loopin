@@ -4,6 +4,7 @@ import React from 'react';
 import { EventItem } from '@loopin/types';
 import { useEventsStore } from '../../stores/useEventsStore';
 import { useUIStore } from '../../stores/useUIStore';
+import { eventsService } from '../../services/events.service';
 
 export interface EventCardProps {
   event: EventItem;
@@ -70,6 +71,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, isFirstCard }) => {
             onClick={(e) => {
               e.stopPropagation();
               toggleLike(event.id);
+              eventsService.toggleLike(event.id).catch(() => {});
             }}
           >
             <div className="btn-icon-circle">

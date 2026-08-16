@@ -4,6 +4,7 @@ import React from 'react';
 import { ReelItem } from '@loopin/types';
 import { useReelsStore } from '../../stores/useReelsStore';
 import { useUIStore } from '../../stores/useUIStore';
+import { reelsService } from '../../services/reels.service';
 
 export interface ReelCardProps {
   reel: ReelItem;
@@ -37,6 +38,7 @@ export const ReelCard: React.FC<ReelCardProps> = ({ reel, isFirstCard }) => {
           onClick={(e) => {
             e.stopPropagation();
             toggleLike(reel.id);
+            reelsService.toggleLike(reel.id).catch(() => {});
           }}
         >
           <div className="btn-icon-circle">

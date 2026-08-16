@@ -3,15 +3,18 @@
 import React, { useState } from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { usersService } from '../../services/users.service';
 
 export const EditProfileModal: React.FC = () => {
   const { isEditProfileModalOpen, closeEditProfileModal } = useUIStore();
-  const { user, updateUserProfile } = useAuthStore();
+  const { user, updateUserProfile, setUser } = useAuthStore();
 
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username ? user.username.replace(/^@/, '') : '');
   const [bio, setBio] = useState(user?.bio || '');
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || '/assets/profile_avatar.png');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   if (!isEditProfileModalOpen) return null;
 
@@ -26,19 +29,38 @@ export const EditProfileModal: React.FC = () => {
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setErrorMsg('');
+
     let cleanUsername = username.trim().replace(/^@/, '');
-    if (!cleanUsername.startsWith('@')) cleanUsername = '@' + cleanUsername;
 
-    updateUserProfile({
-      name: name.trim(),
-      username: cleanUsername,
-      bio: bio.trim(),
-      avatarUrl: avatarPreview,
-    });
+    try {
+      const updatedUser = await usersService.updateProfile({
+        name: name.trim(),
+        username: cleanUsername,
+        bio: bio.trim(),
+        avatarUrl: avatarPreview,
+      });
 
-    closeEditProfileModal();
+      if (updatedUser) {
+        setUser(updatedUser);
+      } else {
+        updateUserProfile({
+          name: name.trim(),
+          username: `@${cleanUsername}`,
+          bio: bio.trim(),
+          avatarUrl: avatarPreview,
+        });
+      }
+
+      closeEditProfileModal();
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Profil güncellenemedi');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,76 +91,73 @@ export const EditProfileModal: React.FC = () => {
                 alt="Avatar"
                 className="w-20 h-20 rounded-full object-cover border-2 border-indigo-500 shadow-md"
               />
-              <label className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center cursor-pointer shadow-sm hover:scale-105 transition-transform">
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarChange}
-                />
-                <span className="text-xs">✏️</span>
+              <label
+                htmlFor="avatar-upload"
+                className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 border border-white text-white flex items-center justify-center text-xs cursor-pointer shadow"
+              >
+                ✎
               </label>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
             </div>
-            <span className="text-[11px] text-neutral-400 mt-1.5">Fotoğrafı Değiştir</span>
+            <span className="text-[11px] text-neutral-400 mt-1">Profil Fotoğrafını Değiştir</span>
           </div>
 
-          {/* Username */}
+          {/* Form Fields */}
           <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1">
-              Kullanıcı Adı
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-xl bg-[#0A0A0A] border border-white/10 p-2.5 text-xs text-white outline-none focus:border-indigo-500"
-            />
-            <div className="text-[10px] text-neutral-500 mt-1">
-              www.loopin.app/@{username || 'kullanici'}
-            </div>
-          </div>
-
-          {/* Name */}
-          <div>
-            <label className="block text-xs font-semibold text-neutral-300 mb-1">İsim</label>
+            <label className="block text-[11px] font-semibold text-neutral-300 mb-1">Ad Soyad</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl bg-[#0A0A0A] border border-white/10 p-2.5 text-xs text-white outline-none focus:border-indigo-500"
+              className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+              required
             />
           </div>
 
-          {/* Bio */}
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-neutral-300">Özgeçmiş</label>
-              <span className="text-[10px] text-neutral-500">{bio.length}/150</span>
+            <label className="block text-[11px] font-semibold text-neutral-300 mb-1">Kullanıcı Adı (@)</label>
+            <div className="relative">
+              <span className="absolute left-3 top-2 text-xs text-neutral-500">@</span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl pl-7 pr-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                required
+              />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-neutral-300 mb-1">Biyografi</label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              maxLength={150}
               rows={3}
-              placeholder="Kendinden bahset..."
-              className="w-full rounded-xl bg-[#0A0A0A] border border-white/10 p-2.5 text-xs text-white outline-none focus:border-indigo-500"
+              className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 resize-none"
+              placeholder="Kendinizden bahsedin..."
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-2 pt-2">
-            <button
-              type="button"
-              onClick={closeEditProfileModal}
-              className="flex-1 py-2.5 rounded-xl bg-[#2A2A2A] text-white text-xs font-semibold"
-            >
-              İptal
-            </button>
+          {errorMsg && (
+            <div className="text-red-400 text-xs text-center font-medium bg-red-500/10 p-2 rounded-xl border border-red-500/20">
+              {errorMsg}
+            </div>
+          )}
+
+          <div className="pt-2">
             <button
               type="submit"
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-xs font-bold shadow-md shadow-indigo-500/25"
+              disabled={isLoading}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-xs font-bold shadow-md shadow-indigo-500/20 active:scale-95 disabled:opacity-50"
             >
-              Kaydet
+              {isLoading ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
             </button>
           </div>
         </form>
