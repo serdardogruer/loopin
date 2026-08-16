@@ -8,6 +8,8 @@ interface ChatState {
   isLoading: boolean;
   isLoadingMessages: boolean;
   
+  setConversations: (conversations: ChatConversation[]) => void;
+  appendMessage: (msg: ChatMessage) => void;
   fetchConversations: () => Promise<void>;
   openChat: (conv: ChatConversation) => Promise<void>;
   openChatWithUser: (recipientId: string) => Promise<string | null>;
@@ -21,6 +23,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   isLoading: false,
   isLoadingMessages: false,
+
+  setConversations: (conversations) => set({ conversations }),
+
+  appendMessage: (msg) =>
+    set((state) => ({
+      messages: state.messages.some((m) => m.id === msg.id) ? state.messages : [...state.messages, msg],
+    })),
 
   fetchConversations: async () => {
     set({ isLoading: true });

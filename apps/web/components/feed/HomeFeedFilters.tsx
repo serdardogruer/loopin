@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useDiscoveryStore } from '../../stores/useDiscoveryStore';
 
 interface HomeFeedFiltersProps {
   selectedCategory: string;
@@ -33,8 +34,46 @@ export const HomeFeedFilters: React.FC<HomeFeedFiltersProps> = ({
   selectedAgeRange,
   onSelectAgeRange,
 }) => {
+  const { viewMode, setViewMode, openDiscoveryModal, settings } = useDiscoveryStore();
+
   return (
-    <div className="flex flex-col gap-1.5 px-3 py-2 bg-black/40 backdrop-blur-md border-b border-white/5 z-20 sticky top-0">
+    <div className="flex flex-col gap-1.5 px-3 py-2 bg-black/50 backdrop-blur-md border-b border-white/5 z-20 sticky top-0">
+      {/* Top Controls: View Mode & Discovery Settings */}
+      <div className="flex items-center justify-between gap-2">
+        {/* Feed / Map Toggle */}
+        <div className="flex bg-[#1E293B]/80 p-0.5 rounded-full border border-white/10">
+          <button
+            onClick={() => setViewMode('feed')}
+            className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
+              viewMode === 'feed'
+                ? 'bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white shadow'
+                : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            📋 Akış
+          </button>
+          <button
+            onClick={() => setViewMode('map')}
+            className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
+              viewMode === 'map'
+                ? 'bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white shadow'
+                : 'text-neutral-400 hover:text-white'
+            }`}
+          >
+            🗺️ Harita
+          </button>
+        </div>
+
+        {/* Discovery Filter Trigger Button */}
+        <button
+          onClick={openDiscoveryModal}
+          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-[11px] font-bold text-neutral-200 active:scale-95 transition-all"
+        >
+          <span>⚙️</span>
+          <span>Keşif ({settings.maxDistanceKm}km)</span>
+        </button>
+      </div>
+
       {/* Category Pills Slider */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
         {CATEGORIES.map((cat) => {

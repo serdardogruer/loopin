@@ -1,12 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useUIStore } from '../stores/useUIStore';
 import { useEventsStore } from '../stores/useEventsStore';
 import { useReelsStore } from '../stores/useReelsStore';
 import { useAuthStore } from '../stores/useAuthStore';
+import { useNotificationsStore } from '../stores/useNotificationsStore';
+import { useChatStore } from '../stores/useChatStore';
+import { useToastStore } from '../stores/useToastStore';
+import { useDiscoveryStore } from '../stores/useDiscoveryStore';
+
 import { eventsService } from '../services/events.service';
 import { reelsService } from '../services/reels.service';
+import { notificationsService } from '../services/notifications.service';
+import { messagesService } from '../services/messages.service';
 
 import { AppHeader } from '../components/navigation/AppHeader';
 import { BottomNavbar } from '../components/navigation/BottomNavbar';
@@ -18,6 +25,7 @@ import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { ProfileMediaGrid } from '../components/profile/ProfileMediaGrid';
 import { ProfileEventsList } from '../components/profile/ProfileEventsList';
 import { HomeFeedFilters } from '../components/feed/HomeFeedFilters';
+import { EventMapView } from '../components/map/EventMapView';
 
 import { CreateModal } from '../components/modals/CreateModal';
 import { EditProfileModal } from '../components/modals/EditProfileModal';
@@ -27,40 +35,91 @@ import { AuthModal } from '../components/modals/AuthModal';
 import { SettingsModal } from '../components/modals/SettingsModal';
 import { NotificationsDrawer } from '../components/modals/NotificationsDrawer';
 import { UserProfileDrawer } from '../components/modals/UserProfileDrawer';
+import { DiscoverySettingsModal } from '../components/modals/DiscoverySettingsModal';
+import { InAppNotificationToast } from '../components/notifications/InAppNotificationToast';
 
 export default function AppHomePage() {
   const { currentTab, currentProfileSubTab, setCurrentProfileSubTab } = useUIStore();
   const { events, setEvents } = useEventsStore();
   const { reels, setReels } = useReelsStore();
-  const { checkAuth } = useAuthStore();
+  const { checkAuth, isAuthenticated, user } = useAuthStore();
+  const { setNotifications, notifications } = useNotificationsStore();
+  const { setConversations, conversations, activeChat, appendMessage } = useChatStore();
+  const { showToast } = useToastStore();
+  const { viewMode } = useDiscoveryStore();
 
   const [selectedCategory, setSelectedCategory] = useState('Tümü');
   const [selectedAgeRange, setSelectedAgeRange] = useState('Tüm Yaşlar');
 
+  const knownNotificationIds = useRef<Set<string>>(new Set());
+  const lastActiveChatMsgCount = useRef<number>(0);
+
   useEffect(() => {
     checkAuth();
 
-    // Fetch live feed from PostgreSQL backend
+    // Fetch initial live feeds
     eventsService.getFeed()
       .then((data) => {
-        if (data && data.length > 0) {
-          setEvents(data);
-        }
+        if (data && data.length > 0) setEvents(data);
       })
-      .catch((err) => {
-        console.warn('Live events feed fallback:', err);
-      });
+      .catch((err) => console.warn('Live events feed fallback:', err));
 
     reelsService.getFeed()
       .then((data) => {
-        if (data && data.length > 0) {
-          setReels(data);
-        }
+        if (data && data.length > 0) setReels(data);
       })
-      .catch((err) => {
-        console.warn('Live reels feed fallback:', err);
-      });
+      .catch((err) => console.warn('Live reels feed fallback:', err));
   }, []);
+
+  // Real-time Live Engine: Polling Sync every 3 seconds for instant messages & notifications
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+
+    const liveSyncInterval = setInterval(async () => {
+      try {
+        // 1. Sync Live Notifications
+        const res = await notificationsService.getNotifications();
+        if (res && res.notifications) {
+          // Check for newly arrived unread notifications
+          res.notifications.forEach((n) => {
+            if (!n.isRead && !knownNotificationIds.current.has(n.id)) {
+              knownNotificationIds.current.add(n.id);
+              showToast({
+                type: 'notification',
+                title: n.title,
+                body: n.body,
+                avatarUrl: n.data?.applicantAvatar || n.data?.followerAvatar || '/assets/profile_avatar.png',
+                actionType: 'open_notifications',
+              });
+            }
+          });
+          setNotifications(res.notifications);
+        }
+
+        // 2. Sync Live Conversations & Messages
+        const liveConvs = await messagesService.getConversations();
+        if (liveConvs) {
+          setConversations(liveConvs);
+        }
+
+        // 3. If in Active Chat, fetch latest messages
+        if (activeChat) {
+          const liveMsgs = await messagesService.getMessages(activeChat.id);
+          if (liveMsgs && liveMsgs.length > lastActiveChatMsgCount.current) {
+            const newMsg = liveMsgs[liveMsgs.length - 1];
+            if (newMsg.senderId !== user.id && lastActiveChatMsgCount.current > 0) {
+              appendMessage(newMsg);
+            }
+            lastActiveChatMsgCount.current = liveMsgs.length;
+          }
+        }
+      } catch (err) {
+        // silent heartbeat catch
+      }
+    }, 3000);
+
+    return () => clearInterval(liveSyncInterval);
+  }, [isAuthenticated, user?.id, activeChat?.id]);
 
   const filteredEvents = events.filter((e) => {
     if (selectedCategory !== 'Tümü' && e.category !== selectedCategory) {
@@ -77,6 +136,9 @@ export default function AppHomePage() {
 
   return (
     <div className="device-mockup">
+      {/* Top Floating In-App Push Toast Banner */}
+      <InAppNotificationToast />
+
       {/* Top Header */}
       <AppHeader />
 
@@ -92,8 +154,10 @@ export default function AppHomePage() {
               onSelectAgeRange={setSelectedAgeRange}
             />
 
-            <div className="flex-1 feed-container events-snap-feed">
-              {filteredEvents.length === 0 ? (
+            <div className="flex-1 feed-container overflow-hidden">
+              {viewMode === 'map' ? (
+                <EventMapView events={filteredEvents} />
+              ) : filteredEvents.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center p-6 text-center text-neutral-400">
                   <div className="text-3xl mb-2">🔍</div>
                   <div className="text-sm font-bold text-white font-['Outfit']">Etkinlik Bulunamadı</div>
@@ -111,9 +175,11 @@ export default function AppHomePage() {
                   </button>
                 </div>
               ) : (
-                filteredEvents.map((event, index) => (
-                  <EventCard key={event.id} event={event} isFirstCard={index === 0} />
-                ))
+                <div className="h-full feed-container events-snap-feed">
+                  {filteredEvents.map((event, index) => (
+                    <EventCard key={event.id} event={event} isFirstCard={index === 0} />
+                  ))}
+                </div>
               )}
             </div>
           </section>
@@ -185,6 +251,7 @@ export default function AppHomePage() {
       <SettingsModal />
       <NotificationsDrawer />
       <UserProfileDrawer />
+      <DiscoverySettingsModal />
     </div>
   );
 }

@@ -7,6 +7,7 @@ interface NotificationsState {
   unreadCount: number;
   isLoading: boolean;
 
+  setNotifications: (notifications: NotificationItem[]) => void;
   fetchNotifications: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
@@ -18,6 +19,12 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   notifications: [],
   unreadCount: 0,
   isLoading: false,
+
+  setNotifications: (notifications) =>
+    set({
+      notifications,
+      unreadCount: notifications.filter((n) => !n.isRead).length,
+    }),
 
   fetchNotifications: async () => {
     set({ isLoading: true });
