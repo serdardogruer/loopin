@@ -54,7 +54,7 @@ export const CreateEventSchema = z.object({
   location: z.string().min(3, 'Mekan/konum giriniz').max(120),
   maxCapacity: z.number().int().min(2, 'Kontenjan en az 2 olmalıdır').max(500),
   price: z.enum(['Ücretsiz', 'Herkes Kendi Öder', 'Etkinlik Sahibi İkram Eder']),
-  description: z.string().min(10, 'Açıklama en az 10 karakter olmalıdır').max(2000),
+  description: z.string().min(1, 'Açıklama gereklidir').max(2000),
   imageUrl: z.string().min(1, 'Kapak görseli gereklidir'),
 });
 export type CreateEventInput = z.infer<typeof CreateEventSchema>;
