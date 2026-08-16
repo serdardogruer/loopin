@@ -9,12 +9,14 @@ import {
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../../core/guards/optional-jwt-auth.guard';
 import { CreateEventSchema, CreateCommentSchema } from '@loopin/validation';
 
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('feed')
   async getFeed(@Request() req: any) {
     const userId = req.user?.id;
@@ -22,6 +24,7 @@ export class EventsController {
     return { success: true, data };
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Get(':id')
   async getById(@Param('id') id: string, @Request() req: any) {
     const userId = req.user?.id;

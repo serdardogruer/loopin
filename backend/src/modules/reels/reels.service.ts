@@ -12,6 +12,14 @@ export class ReelsService {
   ) {}
 
   async getFeed(userId?: string) {
+    const userFollows = userId
+      ? await this.prisma.follow.findMany({
+          where: { followerId: userId },
+          select: { followingId: true },
+        })
+      : [];
+    const followingIds = new Set(userFollows.map((f) => f.followingId));
+
     const reels = await this.prisma.reel.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
@@ -28,6 +36,7 @@ export class ReelsService {
     return reels.map((r) => {
       const isLiked = userId ? r.likes.some((l) => l.userId === userId) : false;
       const isSelf = userId ? r.userId === userId : false;
+      const isFollowingPublisher = userId ? followingIds.has(r.userId) : false;
 
       return {
         id: r.id,
@@ -42,6 +51,7 @@ export class ReelsService {
         commentCount: r.comments.length,
         isLiked,
         isSelf,
+        isFollowingPublisher,
         comments: r.comments.map((c) => ({
           id: c.id,
           reelId: c.reelId,

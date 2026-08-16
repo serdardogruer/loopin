@@ -4,7 +4,9 @@ import React from 'react';
 import { ReelItem } from '@loopin/types';
 import { useReelsStore } from '../../stores/useReelsStore';
 import { useUIStore } from '../../stores/useUIStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { reelsService } from '../../services/reels.service';
+import { usersService } from '../../services/users.service';
 
 export interface ReelCardProps {
   reel: ReelItem;
@@ -14,6 +16,9 @@ export interface ReelCardProps {
 export const ReelCard: React.FC<ReelCardProps> = ({ reel, isFirstCard }) => {
   const { toggleLike, toggleFollow } = useReelsStore();
   const { openCommentsDrawer, openProfileSheet } = useUIStore();
+  const { user } = useAuthStore();
+
+  const isOwnReel = reel.isSelf || (user && user.id === reel.publisherId);
 
   return (
     <div className="reel-card">
@@ -131,12 +136,20 @@ export const ReelCard: React.FC<ReelCardProps> = ({ reel, isFirstCard }) => {
               <span className="text-[10px] text-indigo-400">👁️</span>
             </span>
           </div>
-          {!reel.isSelf && (
+          {!isOwnReel && (
             <button
-              className="reel-follow-btn"
-              onClick={() => toggleFollow(reel.publisherId)}
+              className={`text-xs px-3 py-1 rounded-full font-bold transition-all ${
+                reel.isFollowingPublisher
+                  ? 'bg-white/15 text-neutral-200 border border-white/20'
+                  : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-500/25'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFollow(reel.publisherId);
+                usersService.toggleFollow(reel.publisherId).catch(() => {});
+              }}
             >
-              {reel.isFollowingPublisher ? 'Takip Ediliyor' : 'Takip Et'}
+              {reel.isFollowingPublisher ? 'Takiptesin ✓' : '+ Takip Et'}
             </button>
           )}
         </div>

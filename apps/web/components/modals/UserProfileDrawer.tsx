@@ -39,6 +39,8 @@ export const UserProfileDrawer: React.FC = () => {
     ? [profile.avatarUrl || '/assets/profile_avatar.png', ...(profile.gallery || [])].filter(Boolean)
     : [];
 
+  const isOwnProfile = profile ? (profile.isSelf || (user ? user.id === profile.id : false)) : false;
+
   const handleToggleFollow = async () => {
     if (!user || !profile) {
       alert('Lütfen önce giriş yapın');
@@ -178,7 +180,7 @@ export const UserProfileDrawer: React.FC = () => {
             </div>
 
             {/* Profile Action Bar */}
-            {!profile.isSelf && (
+            {!isOwnProfile && (
               <div className="px-5 flex items-center gap-2">
                 <button
                   onClick={handleToggleFollow}
