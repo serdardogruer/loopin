@@ -15,12 +15,12 @@ RUN pnpm --filter @loopin/web build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+RUN npm install -g pnpm
 
-COPY --from=builder /app/apps/web/public ./apps/web/public
-COPY --from=builder /app/apps/web/.next ./apps/web/.next
-COPY --from=builder /app/apps/web/package.json ./apps/web/
+COPY --from=builder /app/package.json /app/pnpm-workspace.yaml /app/tsconfig.base.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/web ./apps/web
 
 EXPOSE 3000
 CMD ["pnpm", "--filter", "@loopin/web", "start"]
