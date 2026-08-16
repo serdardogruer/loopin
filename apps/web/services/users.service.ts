@@ -13,16 +13,58 @@ export interface FollowUserItem {
   isSelf: boolean;
 }
 
+export interface DetailedUserProfile extends User {
+  lookingFor?: string;
+  languages?: string;
+  zodiac?: string;
+  education?: string;
+  occupation?: string;
+  communicationStyle?: string;
+  loveLanguage?: string;
+  pets?: string;
+  drinking?: string;
+  smoking?: string;
+  workout?: string;
+  gallery?: string[];
+  interests?: string[];
+  isFollowing?: boolean;
+  isBlocked?: boolean;
+  isSelf?: boolean;
+  stats?: {
+    reelsCount: number;
+    eventsCount: number;
+    followersCount: number;
+    followingCount: number;
+  };
+  reels?: Array<{
+    id: string;
+    imageUrl: string;
+    caption: string;
+    likeCount: number;
+    commentCount: number;
+    mediaType: string;
+  }>;
+  events?: Array<{
+    id: string;
+    title: string;
+    date: string;
+    location: string;
+    imageUrl: string;
+    ageRange?: string;
+    isHost: boolean;
+  }>;
+}
+
 export const usersService = {
-  async getProfile(username: string): Promise<User> {
-    const cleanUsername = username.replace(/^@/, '');
-    return apiClient<User>(`/users/${cleanUsername}`, {
+  async getProfile(usernameOrId: string): Promise<DetailedUserProfile> {
+    const cleanUsername = usernameOrId.replace(/^@/, '');
+    return apiClient<DetailedUserProfile>(`/users/${cleanUsername}`, {
       method: 'GET',
     });
   },
 
-  async updateProfile(data: UpdateProfileInput): Promise<User> {
-    return apiClient<User>('/users/profile', {
+  async updateProfile(data: UpdateProfileInput): Promise<DetailedUserProfile> {
+    return apiClient<DetailedUserProfile>('/users/profile', {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -43,6 +85,18 @@ export const usersService = {
   async getFollowing(targetUserId: string): Promise<FollowUserItem[]> {
     return apiClient<FollowUserItem[]>(`/users/${targetUserId}/following`, {
       method: 'GET',
+    });
+  },
+
+  async blockUser(targetUserId: string): Promise<{ isBlocked: boolean; message: string }> {
+    return apiClient<{ isBlocked: boolean; message: string }>(`/users/${targetUserId}/block`, {
+      method: 'POST',
+    });
+  },
+
+  async unblockUser(targetUserId: string): Promise<{ isBlocked: boolean; message: string }> {
+    return apiClient<{ isBlocked: boolean; message: string }>(`/users/${targetUserId}/unblock`, {
+      method: 'POST',
     });
   },
 };

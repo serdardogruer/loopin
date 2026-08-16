@@ -46,6 +46,11 @@ interface UIState {
   isNotificationsOpen: boolean;
   openNotifications: () => void;
   closeNotifications: () => void;
+
+  // Public User Profile Sheet
+  activeProfileUserId: string | null;
+  openProfileSheet: (userId: string) => void;
+  closeProfileSheet: () => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -83,4 +88,8 @@ export const useUIStore = create<UIState>((set) => ({
   isNotificationsOpen: false,
   openNotifications: () => set({ isNotificationsOpen: true }),
   closeNotifications: () => set({ isNotificationsOpen: false }),
+
+  activeProfileUserId: null,
+  openProfileSheet: (userId) => set({ activeProfileUserId: userId }),
+  closeProfileSheet: () => set({ activeProfileUserId: null }),
 }));

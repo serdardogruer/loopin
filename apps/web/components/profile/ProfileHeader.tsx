@@ -114,6 +114,37 @@ export const ProfileHeader: React.FC = () => {
         </span>
       </div>
 
+      {/* Rich Lifestyle Badges & Photo Strip */}
+      {((user as any)?.zodiac || (user as any)?.languages || (user as any)?.lookingFor || (user as any)?.interests?.length > 0) && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {(user as any)?.zodiac && (
+            <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-300 font-semibold">
+              🌙 {(user as any).zodiac}
+            </span>
+          )}
+          {(user as any)?.lookingFor && (
+            <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-300 font-semibold">
+              👁️ {(user as any).lookingFor}
+            </span>
+          )}
+          {(user as any)?.languages && (
+            <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-300 font-semibold">
+              🌐 {(user as any).languages}
+            </span>
+          )}
+          {(user as any)?.occupation && (
+            <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-300 font-semibold">
+              💼 {(user as any).occupation}
+            </span>
+          )}
+          {(user as any)?.interests?.slice(0, 3).map((tag: string) => (
+            <span key={tag} className="px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] text-neutral-300 font-semibold">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Action Buttons */}
       <div className="flex items-center gap-2 pt-2">
         <button

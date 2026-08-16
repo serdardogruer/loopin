@@ -13,7 +13,7 @@ export interface EventCardProps {
 
 export const EventCard: React.FC<EventCardProps> = ({ event, isFirstCard }) => {
   const { toggleLike } = useEventsStore();
-  const { openDetailModal, openCommentsDrawer } = useUIStore();
+  const { openDetailModal, openCommentsDrawer, openProfileSheet } = useUIStore();
 
   const handleCardClick = (e: React.MouseEvent) => {
     // If clicked on button or action, don't open detail lightbox
@@ -36,9 +36,14 @@ export const EventCard: React.FC<EventCardProps> = ({ event, isFirstCard }) => {
         </div>
       )}
 
-      {/* Title */}
-      <div className="event-card-header">
-        <h2 className="event-card-title">{event.title}</h2>
+      {/* Title & Badges */}
+      <div className="event-card-header flex items-center justify-between gap-2">
+        <h2 className="event-card-title truncate">{event.title}</h2>
+        {event.ageRange && (
+          <span className="px-2 py-0.5 rounded-full bg-white/10 text-indigo-300 text-[10px] font-bold whitespace-nowrap border border-white/10">
+            🎂 {event.ageRange}
+          </span>
+        )}
       </div>
 
       {/* Media section with Side Actions Float on the Right */}
@@ -52,7 +57,11 @@ export const EventCard: React.FC<EventCardProps> = ({ event, isFirstCard }) => {
             className="side-action-btn"
             onClick={(e) => {
               e.stopPropagation();
-              openDetailModal('event', event);
+              if (event.hostId) {
+                openProfileSheet(event.hostId);
+              } else {
+                openDetailModal('event', event);
+              }
             }}
           >
             <div className="side-action-avatar-wrapper">
@@ -61,7 +70,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, isFirstCard }) => {
                 alt={event.hostName}
                 className="side-action-avatar"
               />
-              <span className="avatar-follow-plus">+</span>
+              <span className="avatar-follow-plus">👁️</span>
             </div>
           </button>
 

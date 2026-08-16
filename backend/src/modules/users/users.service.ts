@@ -22,7 +22,13 @@ export class UsersService {
         ],
       },
       include: {
-        profile: true,
+        profile: {
+          include: {
+            interests: {
+              include: { interest: true },
+            },
+          },
+        },
         hostedEvents: {
           where: { isCancelled: false },
           orderBy: { createdAt: 'desc' },
@@ -42,12 +48,41 @@ export class UsersService {
       ? user.followers.some((f) => f.followerId === currentUserId)
       : false;
 
+    // Check if blocked
+    let isBlocked = false;
+    if (currentUserId && currentUserId !== user.id) {
+      const block = await this.prisma.block.findUnique({
+        where: {
+          blockerId_blockedId: {
+            blockerId: currentUserId,
+            blockedId: user.id,
+          },
+        },
+      });
+      isBlocked = !!block;
+    }
+
     return {
       id: user.id,
       name: user.profile?.name || 'Kullanıcı',
       username: `@${user.profile?.username || 'user'}`,
       avatarUrl: user.profile?.avatarUrl,
       bio: user.profile?.bio,
+      city: user.profile?.city,
+      district: user.profile?.district,
+      lookingFor: user.profile?.lookingFor,
+      languages: user.profile?.languages,
+      zodiac: user.profile?.zodiac,
+      education: user.profile?.education,
+      occupation: user.profile?.occupation,
+      communicationStyle: user.profile?.communicationStyle,
+      loveLanguage: user.profile?.loveLanguage,
+      pets: user.profile?.pets,
+      drinking: user.profile?.drinking,
+      smoking: user.profile?.smoking,
+      workout: user.profile?.workout,
+      gallery: user.profile?.gallery || [],
+      interests: user.profile?.interests.map((i) => i.interest.name) || [],
       isVerified: user.isVerified,
       isPro: user.isPro,
       trustScore: `%${user.profile?.trustScore || 98} Güven Skoru`,
@@ -72,9 +107,12 @@ export class UsersService {
         date: e.dateText,
         location: e.location,
         imageUrl: e.imageUrl,
+        ageRange: e.ageRange,
         isHost: true,
       })),
       isFollowing,
+      isBlocked,
+      isSelf: currentUserId === user.id,
     };
   }
 
@@ -99,6 +137,21 @@ export class UsersService {
         username: dto.username ? dto.username.toLowerCase().replace(/^@/, '') : undefined,
         bio: dto.bio,
         avatarUrl: dto.avatarUrl || undefined,
+        lookingFor: dto.lookingFor,
+        languages: dto.languages,
+        zodiac: dto.zodiac,
+        education: dto.education,
+        occupation: dto.occupation,
+        communicationStyle: dto.communicationStyle,
+        loveLanguage: dto.loveLanguage,
+        pets: dto.pets,
+        drinking: dto.drinking,
+        smoking: dto.smoking,
+        workout: dto.workout,
+        gallery: dto.gallery || undefined,
+      },
+      include: {
+        interests: { include: { interest: true } },
       },
     });
 
@@ -107,6 +160,18 @@ export class UsersService {
       username: `@${updated.username}`,
       avatarUrl: updated.avatarUrl,
       bio: updated.bio,
+      lookingFor: updated.lookingFor,
+      languages: updated.languages,
+      zodiac: updated.zodiac,
+      education: updated.education,
+      occupation: updated.occupation,
+      communicationStyle: updated.communicationStyle,
+      loveLanguage: updated.loveLanguage,
+      pets: updated.pets,
+      drinking: updated.drinking,
+      smoking: updated.smoking,
+      workout: updated.workout,
+      gallery: updated.gallery,
     };
   }
 
@@ -193,7 +258,6 @@ export class UsersService {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Check if current user is following each of them
     const currentUserFollowing = currentUserId
       ? await this.prisma.follow.findMany({
           where: { followerId: currentUserId },
@@ -246,5 +310,54 @@ export class UsersService {
       isFollowing: followingSet.has(f.following.id),
       isSelf: currentUserId === f.following.id,
     }));
+  }
+
+  /**
+   * Block User
+   */
+  async blockUser(currentUserId: string, targetUserId: string) {
+    if (currentUserId === targetUserId) {
+      throw new BadRequestException('Kendinizi engelleyemezsiniz.');
+    }
+
+    await this.prisma.block.upsert({
+      where: {
+        blockerId_blockedId: {
+          blockerId: currentUserId,
+          blockedId: targetUserId,
+        },
+      },
+      update: {},
+      create: {
+        blockerId: currentUserId,
+        blockedId: targetUserId,
+      },
+    });
+
+    // Remove any follows between them
+    await this.prisma.follow.deleteMany({
+      where: {
+        OR: [
+          { followerId: currentUserId, followingId: targetUserId },
+          { followerId: targetUserId, followingId: currentUserId },
+        ],
+      },
+    });
+
+    return { isBlocked: true, message: 'Kullanıcı engellendi' };
+  }
+
+  /**
+   * Unblock User
+   */
+  async unblockUser(currentUserId: string, targetUserId: string) {
+    await this.prisma.block.deleteMany({
+      where: {
+        blockerId: currentUserId,
+        blockedId: targetUserId,
+      },
+    });
+
+    return { isBlocked: false, message: 'Kullanıcı engeli kaldırıldı' };
   }
 }

@@ -100,10 +100,22 @@ model Profile {
   city            String?
   district        String?
   trustScore      Int              @default(95)
-  badgeTitle      String?          @default("Süper Organizatör")
-  interests       UserInterest[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  badgeTitle         String?          @default("Süper Organizatör")
+  lookingFor         String?
+  languages          String?
+  zodiac             String?
+  education          String?
+  occupation         String?
+  communicationStyle String?
+  loveLanguage       String?
+  pets               String?
+  drinking           String?
+  smoking            String?
+  workout            String?
+  gallery            String[]         @default([])
+  interests          UserInterest[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
   @@index([username])
   @@index([trustScore])
@@ -140,6 +152,7 @@ model Event {
   priceType       String             @default("Herkes Kendi Öder")
   imageUrl        String
   description     String             @db.Text
+  ageRange        String             @default("Her Yaşa Uygun")
   isCancelled     Boolean            @default(false)
 
   hostId          String

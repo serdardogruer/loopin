@@ -48,4 +48,18 @@ export class UsersController {
     const data = await this.usersService.getFollowing(id, req.user?.id);
     return { success: true, data };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/block')
+  async blockUser(@Param('id') id: string, @Request() req: any) {
+    const data = await this.usersService.blockUser(req.user.id, id);
+    return { success: true, data };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/unblock')
+  async unblockUser(@Param('id') id: string, @Request() req: any) {
+    const data = await this.usersService.unblockUser(req.user.id, id);
+    return { success: true, data };
+  }
 }

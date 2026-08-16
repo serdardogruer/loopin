@@ -9,6 +9,21 @@ export interface User {
   name: string;
   avatarUrl?: string | null;
   bio?: string | null;
+  city?: string | null;
+  district?: string | null;
+  lookingFor?: string | null;
+  languages?: string | null;
+  zodiac?: string | null;
+  education?: string | null;
+  occupation?: string | null;
+  communicationStyle?: string | null;
+  loveLanguage?: string | null;
+  pets?: string | null;
+  drinking?: string | null;
+  smoking?: string | null;
+  workout?: string | null;
+  gallery?: string[];
+  interests?: string[];
   isVerified: boolean;
   isPro: boolean;
   role: UserRole;
@@ -80,6 +95,7 @@ export interface EventItem {
   price: EventPriceType;
   imageUrl: string;
   description: string;
+  ageRange?: string;
   hostId: string;
   hostName: string;
   hostUsername: string;
@@ -89,6 +105,7 @@ export interface EventItem {
   commentCount: number;
   isLiked?: boolean;
   isJoined?: boolean;
+  isHost?: boolean;
   applicationStatus?: ApplicationStatus;
   attendees: EventAttendee[];
   comments: EventComment[];

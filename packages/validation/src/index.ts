@@ -32,8 +32,21 @@ export const UpdateProfileSchema = z.object({
     .max(30)
     .regex(/^[a-zA-Z0-9_.]+$/)
     .optional(),
-  bio: z.string().max(150, 'Biyografi en fazla 150 karakter olabilir').optional(),
-  avatarUrl: z.string().url().optional().or(z.literal('')),
+  bio: z.string().max(500, 'Biyografi en fazla 500 karakter olabilir').optional(),
+  avatarUrl: z.string().optional().or(z.literal('')),
+  lookingFor: z.string().optional(),
+  languages: z.string().optional(),
+  zodiac: z.string().optional(),
+  education: z.string().optional(),
+  occupation: z.string().optional(),
+  communicationStyle: z.string().optional(),
+  loveLanguage: z.string().optional(),
+  pets: z.string().optional(),
+  drinking: z.string().optional(),
+  smoking: z.string().optional(),
+  workout: z.string().optional(),
+  gallery: z.array(z.string()).optional(),
+  interests: z.array(z.string()).optional(),
 });
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
 
@@ -56,6 +69,7 @@ export const CreateEventSchema = z.object({
   price: z.enum(['Ücretsiz', 'Herkes Kendi Öder', 'Etkinlik Sahibi İkram Eder']),
   description: z.string().min(1, 'Açıklama gereklidir').max(2000),
   imageUrl: z.string().min(1, 'Kapak görseli gereklidir'),
+  ageRange: z.string().optional(),
 });
 export type CreateEventInput = z.infer<typeof CreateEventSchema>;
 

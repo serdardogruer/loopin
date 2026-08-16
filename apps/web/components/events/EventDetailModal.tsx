@@ -9,7 +9,7 @@ import { eventsService } from '../../services/events.service';
 import { EventItem, ReelItem } from '@loopin/types';
 
 export const EventDetailModal: React.FC = () => {
-  const { detailItem, closeDetailModal, setCurrentTab } = useUIStore();
+  const { detailItem, closeDetailModal, setCurrentTab, openProfileSheet } = useUIStore();
   const { toggleJoin, events, setEvents } = useEventsStore();
   const { user } = useAuthStore();
   const { openChatWithUser } = useChatStore();
@@ -38,9 +38,7 @@ export const EventDetailModal: React.FC = () => {
     else if (isFull)
       capacityLabel = `${currentEvent.maxCapacity}/${currentEvent.maxCapacity} — Kontenjan Doldu`;
 
-    const maxShow = 5;
-    const shownAttendees = (currentEvent.attendees || []).slice(0, maxShow);
-    const extraAttendees = (currentEvent.attendees || []).length - maxShow;
+    const attendeesList = currentEvent.attendees || [];
 
     const handleApply = async () => {
       if (!user) {
@@ -62,14 +60,20 @@ export const EventDetailModal: React.FC = () => {
       }
     };
 
-    const handleMessageHost = async () => {
+    const handleOpenChat = async (targetUserId: string) => {
       if (!user) {
         alert('Lütfen önce giriş yapın');
         return;
       }
       closeDetailModal();
-      await openChatWithUser(currentEvent.hostId);
+      await openChatWithUser(targetUserId);
       setCurrentTab('messages');
+    };
+
+    const handleOpenProfile = (targetUserId?: string) => {
+      if (!targetUserId) return;
+      closeDetailModal();
+      openProfileSheet(targetUserId);
     };
 
     return (
@@ -95,9 +99,16 @@ export const EventDetailModal: React.FC = () => {
           />
 
           <div className="p-4 overflow-y-auto flex-1 flex flex-col gap-3">
-            <span className="inline-block self-start px-2.5 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
-              {currentEvent.category}
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+                {currentEvent.category}
+              </span>
+              {currentEvent.ageRange && (
+                <span className="px-2.5 py-0.5 rounded-full bg-white/10 border border-white/10 text-neutral-300 text-xs font-semibold">
+                  🎂 {currentEvent.ageRange}
+                </span>
+              )}
+            </div>
 
             <h3 className="text-lg font-bold text-white font-['Outfit']">{currentEvent.title}</h3>
 
@@ -105,10 +116,20 @@ export const EventDetailModal: React.FC = () => {
               <div>📅 {currentEvent.date}</div>
               <div>📍 {currentEvent.location}</div>
               <div className="flex items-center justify-between">
-                <span>👤 Organizatör: <strong className="text-white">{currentEvent.hostName}</strong></span>
+                <div
+                  onClick={() => handleOpenProfile(currentEvent.hostId)}
+                  className="cursor-pointer hover:text-indigo-300 flex items-center gap-1.5"
+                >
+                  <img
+                    src={currentEvent.hostAvatar || '/assets/profile_avatar.png'}
+                    alt={currentEvent.hostName}
+                    className="w-5 h-5 rounded-full object-cover border border-indigo-400"
+                  />
+                  <span>Organizatör: <strong className="text-white underline">{currentEvent.hostName}</strong></span>
+                </div>
                 {!isHost && (
                   <button
-                    onClick={handleMessageHost}
+                    onClick={() => handleOpenChat(currentEvent.hostId)}
                     className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold flex items-center gap-1"
                   >
                     <span>💬</span> Mesaj Yaz
@@ -131,26 +152,46 @@ export const EventDetailModal: React.FC = () => {
 
             <p className="text-xs text-neutral-400 leading-relaxed">{currentEvent.description}</p>
 
-            {/* Attendees Row */}
+            {/* Attendees Row with Clickable Profile Sheets and Chat Actions */}
             <div className="pt-2 border-t border-white/10">
-              <div className="text-xs font-semibold text-neutral-400 mb-2">
-                Onaylı Katılımcılar ({shownAttendees.length + (extraAttendees > 0 ? extraAttendees : 0)})
+              <div className="text-xs font-semibold text-neutral-400 mb-2 flex items-center justify-between">
+                <span>Onaylı Katılımcılar ({attendeesList.length})</span>
+                <span className="text-[10px] text-neutral-500">Profile gitmek için dokunun</span>
               </div>
-              <div className="flex items-center">
-                {shownAttendees.map((a: any, i: number) => (
-                  <img
-                    key={a.id || i}
-                    src={a.avatarUrl || '/assets/profile_avatar.png'}
-                    alt={a.name}
-                    title={a.name}
-                    className="w-7 h-7 rounded-full object-cover border-2 border-[#1A1A1A] -ml-2 first:ml-0"
-                  />
-                ))}
-                {extraAttendees > 0 && (
-                  <span className="w-7 h-7 rounded-full bg-white/10 border-2 border-[#1A1A1A] -ml-2 text-[10px] font-bold flex items-center justify-center text-white">
-                    +{extraAttendees}
-                  </span>
-                )}
+              <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                {attendeesList.map((a: any, i: number) => {
+                  const isAttendeeSelf = user?.id === a.userId;
+                  return (
+                    <div
+                      key={a.id || i}
+                      className="flex items-center justify-between p-1.5 rounded-xl bg-white/5 border border-white/5"
+                    >
+                      <div
+                        onClick={() => handleOpenProfile(a.userId)}
+                        className="flex items-center gap-2 cursor-pointer min-w-0"
+                      >
+                        <img
+                          src={a.avatarUrl || '/assets/profile_avatar.png'}
+                          alt={a.name}
+                          className="w-6 h-6 rounded-full object-cover border border-white/10 flex-shrink-0"
+                        />
+                        <span className="text-xs font-medium text-white truncate max-w-[120px]">
+                          {a.name} {isAttendeeSelf ? '(Sen)' : ''}
+                        </span>
+                      </div>
+
+                      {/* Direct Message button between approved attendees and host */}
+                      {!isAttendeeSelf && (isJoined || isHost) && (
+                        <button
+                          onClick={() => handleOpenChat(a.userId)}
+                          className="px-2 py-0.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/60 text-indigo-300 text-[10px] font-bold flex items-center gap-1"
+                        >
+                          <span>💬</span> Mesaj
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -243,7 +284,15 @@ export const EventDetailModal: React.FC = () => {
         />
 
         <div className="p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2">
+          <div
+            onClick={() => {
+              if (currentReel.publisherId) {
+                closeDetailModal();
+                openProfileSheet(currentReel.publisherId);
+              }
+            }}
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80"
+          >
             <img
               src={currentReel.publisherAvatar || '/assets/profile_avatar.png'}
               alt={currentReel.publisherName}

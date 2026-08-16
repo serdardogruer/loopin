@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUIStore } from '../stores/useUIStore';
 import { useEventsStore } from '../stores/useEventsStore';
 import { useReelsStore } from '../stores/useReelsStore';
@@ -17,6 +17,7 @@ import { ActiveChatPanel } from '../components/messages/ActiveChatPanel';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { ProfileMediaGrid } from '../components/profile/ProfileMediaGrid';
 import { ProfileEventsList } from '../components/profile/ProfileEventsList';
+import { HomeFeedFilters } from '../components/feed/HomeFeedFilters';
 
 import { CreateModal } from '../components/modals/CreateModal';
 import { EditProfileModal } from '../components/modals/EditProfileModal';
@@ -25,12 +26,16 @@ import { CommentsDrawer } from '../components/modals/CommentsDrawer';
 import { AuthModal } from '../components/modals/AuthModal';
 import { SettingsModal } from '../components/modals/SettingsModal';
 import { NotificationsDrawer } from '../components/modals/NotificationsDrawer';
+import { UserProfileDrawer } from '../components/modals/UserProfileDrawer';
 
 export default function AppHomePage() {
   const { currentTab, currentProfileSubTab, setCurrentProfileSubTab } = useUIStore();
   const { events, setEvents } = useEventsStore();
   const { reels, setReels } = useReelsStore();
   const { checkAuth } = useAuthStore();
+
+  const [selectedCategory, setSelectedCategory] = useState('Tümü');
+  const [selectedAgeRange, setSelectedAgeRange] = useState('Tüm Yaşlar');
 
   useEffect(() => {
     checkAuth();
@@ -57,6 +62,19 @@ export default function AppHomePage() {
       });
   }, []);
 
+  const filteredEvents = events.filter((e) => {
+    if (selectedCategory !== 'Tümü' && e.category !== selectedCategory) {
+      return false;
+    }
+    if (selectedAgeRange !== 'Tüm Yaşlar') {
+      const eventAge = e.ageRange || 'Her Yaşa Uygun';
+      if (eventAge !== 'Her Yaşa Uygun' && eventAge !== selectedAgeRange) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   return (
     <div className="device-mockup">
       {/* Top Header */}
@@ -66,10 +84,38 @@ export default function AppHomePage() {
       <main className="app-content">
         {/* TAB 1: ANASAYFA (ETKİNLİKLER) */}
         {currentTab === 'home' && (
-          <section className="h-full feed-container events-snap-feed">
-            {events.map((event, index) => (
-              <EventCard key={event.id} event={event} isFirstCard={index === 0} />
-            ))}
+          <section className="h-full flex flex-col">
+            <HomeFeedFilters
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+              selectedAgeRange={selectedAgeRange}
+              onSelectAgeRange={setSelectedAgeRange}
+            />
+
+            <div className="flex-1 feed-container events-snap-feed">
+              {filteredEvents.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center p-6 text-center text-neutral-400">
+                  <div className="text-3xl mb-2">🔍</div>
+                  <div className="text-sm font-bold text-white font-['Outfit']">Etkinlik Bulunamadı</div>
+                  <div className="text-xs mt-1 text-neutral-500">
+                    Seçilen filtre kriterlerine uygun bir etkinlik bulunamadı. Filtreleri temizleyebilirsiniz.
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('Tümü');
+                      setSelectedAgeRange('Tüm Yaşlar');
+                    }}
+                    className="mt-4 px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-bold"
+                  >
+                    Filtreleri Sıfırla
+                  </button>
+                </div>
+              ) : (
+                filteredEvents.map((event, index) => (
+                  <EventCard key={event.id} event={event} isFirstCard={index === 0} />
+                ))
+              )}
+            </div>
           </section>
         )}
 
@@ -138,6 +184,7 @@ export default function AppHomePage() {
       <AuthModal />
       <SettingsModal />
       <NotificationsDrawer />
+      <UserProfileDrawer />
     </div>
   );
 }

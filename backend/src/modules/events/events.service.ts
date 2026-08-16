@@ -14,8 +14,21 @@ export class EventsService {
   ) {}
 
   async getFeed(userId?: string) {
+    let blockedHostIds: string[] = [];
+    if (userId) {
+      const blocks = await this.prisma.block.findMany({
+        where: {
+          OR: [{ blockerId: userId }, { blockedId: userId }],
+        },
+      });
+      blockedHostIds = blocks.map((b) => (b.blockerId === userId ? b.blockedId : b.blockerId));
+    }
+
     const events = await this.prisma.event.findMany({
-      where: { isCancelled: false },
+      where: {
+        isCancelled: false,
+        hostId: blockedHostIds.length > 0 ? { notIn: blockedHostIds } : undefined,
+      },
       orderBy: { createdAt: 'desc' },
       include: {
         host: {
@@ -36,7 +49,7 @@ export class EventsService {
         },
         likes: true,
       },
-      take: 20,
+      take: 30,
     });
 
     return events.map((e) => this.formatEvent(e, userId));
@@ -88,6 +101,7 @@ export class EventsService {
         priceType: dto.price,
         imageUrl: dto.imageUrl,
         description: dto.description,
+        ageRange: dto.ageRange || 'Her Yaşa Uygun',
         hostId: userId,
         participants: {
           create: {
@@ -195,6 +209,19 @@ export class EventsService {
     if (!event) throw new NotFoundException('Etkinlik bulunamadı');
     if (event.hostId === userId) {
       throw new BadRequestException('Kendi etkinliğinizin organizatörüsünüz.');
+    }
+
+    // Check block
+    const block = await this.prisma.block.findFirst({
+      where: {
+        OR: [
+          { blockerId: event.hostId, blockedId: userId },
+          { blockerId: userId, blockedId: event.hostId },
+        ],
+      },
+    });
+    if (block) {
+      throw new BadRequestException('Bu etkinliğe başvuru yapamazsınız.');
     }
 
     const isParticipating = event.participants.some((p) => p.userId === userId);
@@ -447,6 +474,7 @@ export class EventsService {
       price: e.priceType,
       imageUrl: e.imageUrl,
       description: e.description,
+      ageRange: e.ageRange || 'Her Yaşa Uygun',
       hostId: e.hostId,
       hostName: e.host?.profile?.name || 'Organizatör',
       hostUsername: `@${e.host?.profile?.username || 'user'}`,

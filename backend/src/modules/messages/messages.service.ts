@@ -90,6 +90,19 @@ export class MessagesService {
   }
 
   async sendMessage(senderId: string, recipientId: string, text: string, conversationId?: string) {
+    // Check block
+    const isBlocked = await this.prisma.block.findFirst({
+      where: {
+        OR: [
+          { blockerId: senderId, blockedId: recipientId },
+          { blockerId: recipientId, blockedId: senderId },
+        ],
+      },
+    });
+    if (isBlocked) {
+      throw new Error('Bu kullanıcı ile mesajlaşamazsınız.');
+    }
+
     let targetConvId = conversationId;
 
     if (!targetConvId) {

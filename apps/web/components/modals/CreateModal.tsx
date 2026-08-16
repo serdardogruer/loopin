@@ -38,6 +38,7 @@ export const CreateModal: React.FC = () => {
   const [eventCapacity, setEventCapacity] = useState(10);
   const [eventPrice, setEventPrice] = useState<EventPriceType>('Herkes Kendi Öder');
   const [eventDesc, setEventDesc] = useState('');
+  const [eventAgeRange, setEventAgeRange] = useState('Her Yaşa Uygun');
   const [eventPreview, setEventPreview] = useState<string | null>('/assets/event_concert.png');
 
   if (!isCreateModalOpen) return null;
@@ -99,6 +100,7 @@ export const CreateModal: React.FC = () => {
         price: eventPrice,
         imageUrl: eventPreview || '/assets/event_concert.png',
         description: eventDesc,
+        ageRange: eventAgeRange,
       });
 
       if (created) {
@@ -338,17 +340,32 @@ export const CreateModal: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-300 mb-1">Ücret Tipi</label>
+                  <label className="block text-xs font-semibold text-neutral-300 mb-1">🎂 Yaş Filtresi</label>
                   <select
-                    value={eventPrice}
-                    onChange={(e) => setEventPrice(e.target.value as EventPriceType)}
+                    value={eventAgeRange}
+                    onChange={(e) => setEventAgeRange(e.target.value)}
                     className="w-full bg-[#0A0A0A] text-white text-xs px-3 py-2.5 rounded-xl border border-white/10 focus:border-indigo-500 outline-none"
                   >
-                    <option value="Herkes Kendi Öder">Herkes Kendi Öder</option>
-                    <option value="Ücretsiz">Ücretsiz</option>
-                    <option value="Etkinlik Sahibi İkram Eder">İkram Eder</option>
+                    <option value="Her Yaşa Uygun">Her Yaşa Uygun</option>
+                    <option value="18 - 25 Yaş">18 - 25 Yaş</option>
+                    <option value="20 - 35 Yaş">20 - 35 Yaş</option>
+                    <option value="25 - 45 Yaş">25 - 45 Yaş</option>
+                    <option value="30+ Yaş">30+ Yaş</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 mb-1">Ücret Tipi</label>
+                <select
+                  value={eventPrice}
+                  onChange={(e) => setEventPrice(e.target.value as EventPriceType)}
+                  className="w-full bg-[#0A0A0A] text-white text-xs px-3 py-2.5 rounded-xl border border-white/10 focus:border-indigo-500 outline-none"
+                >
+                  <option value="Herkes Kendi Öder">Herkes Kendi Öder</option>
+                  <option value="Ücretsiz">Ücretsiz</option>
+                  <option value="Etkinlik Sahibi İkram Eder">Etkinlik Sahibi İkram Eder</option>
+                </select>
               </div>
 
               <div>
