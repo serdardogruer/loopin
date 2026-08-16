@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useUIStore } from '../stores/useUIStore';
 import { useEventsStore } from '../stores/useEventsStore';
 import { useReelsStore } from '../stores/useReelsStore';
@@ -24,7 +24,6 @@ import { ActiveChatPanel } from '../components/messages/ActiveChatPanel';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { ProfileMediaGrid } from '../components/profile/ProfileMediaGrid';
 import { ProfileEventsList } from '../components/profile/ProfileEventsList';
-import { HomeFeedFilters } from '../components/feed/HomeFeedFilters';
 import { EventMapView } from '../components/map/EventMapView';
 
 import { CreateModal } from '../components/modals/CreateModal';
@@ -36,6 +35,7 @@ import { SettingsModal } from '../components/modals/SettingsModal';
 import { NotificationsDrawer } from '../components/modals/NotificationsDrawer';
 import { UserProfileDrawer } from '../components/modals/UserProfileDrawer';
 import { DiscoverySettingsModal } from '../components/modals/DiscoverySettingsModal';
+import { FilterModal } from '../components/modals/FilterModal';
 import { InAppNotificationToast } from '../components/notifications/InAppNotificationToast';
 
 export default function AppHomePage() {
@@ -43,13 +43,10 @@ export default function AppHomePage() {
   const { events, setEvents } = useEventsStore();
   const { reels, setReels } = useReelsStore();
   const { checkAuth, isAuthenticated, user } = useAuthStore();
-  const { setNotifications, notifications } = useNotificationsStore();
-  const { setConversations, conversations, activeChat, appendMessage } = useChatStore();
+  const { setNotifications } = useNotificationsStore();
+  const { setConversations, activeChat, appendMessage } = useChatStore();
   const { showToast } = useToastStore();
-  const { viewMode } = useDiscoveryStore();
-
-  const [selectedCategory, setSelectedCategory] = useState('Tümü');
-  const [selectedAgeRange, setSelectedAgeRange] = useState('Tüm Yaşlar');
+  const { viewMode, selectedCategory, selectedAgeRange, resetFilters } = useDiscoveryStore();
 
   const knownNotificationIds = useRef<Set<string>>(new Set());
   const lastActiveChatMsgCount = useRef<number>(0);
@@ -147,13 +144,6 @@ export default function AppHomePage() {
         {/* TAB 1: ANASAYFA (ETKİNLİKLER) */}
         {currentTab === 'home' && (
           <section className="h-full flex flex-col">
-            <HomeFeedFilters
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-              selectedAgeRange={selectedAgeRange}
-              onSelectAgeRange={setSelectedAgeRange}
-            />
-
             <div className="flex-1 feed-container overflow-hidden">
               {viewMode === 'map' ? (
                 <EventMapView events={filteredEvents} />
@@ -165,10 +155,7 @@ export default function AppHomePage() {
                     Seçilen filtre kriterlerine uygun bir etkinlik bulunamadı. Filtreleri temizleyebilirsiniz.
                   </div>
                   <button
-                    onClick={() => {
-                      setSelectedCategory('Tümü');
-                      setSelectedAgeRange('Tüm Yaşlar');
-                    }}
+                    onClick={resetFilters}
                     className="mt-4 px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-bold"
                   >
                     Filtreleri Sıfırla
@@ -252,6 +239,7 @@ export default function AppHomePage() {
       <NotificationsDrawer />
       <UserProfileDrawer />
       <DiscoverySettingsModal />
+      <FilterModal />
     </div>
   );
 }

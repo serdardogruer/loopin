@@ -4,11 +4,15 @@ import React from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useNotificationsStore } from '../../stores/useNotificationsStore';
+import { useDiscoveryStore } from '../../stores/useDiscoveryStore';
 
 export const AppHeader: React.FC = () => {
-  const { setCurrentTab, openNotifications, openSettingsModal, openAuthModal } = useUIStore();
+  const { currentTab, setCurrentTab, openNotifications, openSettingsModal, openAuthModal } = useUIStore();
   const { isAuthenticated, user } = useAuthStore();
   const { unreadCount } = useNotificationsStore();
+  const { openFilterModal, selectedCategory, selectedAgeRange, viewMode } = useDiscoveryStore();
+
+  const hasActiveFilters = selectedCategory !== 'Tümü' || selectedAgeRange !== 'Tüm Yaşlar' || viewMode === 'map';
 
   return (
     <header className="app-header">
@@ -18,6 +22,44 @@ export const AppHeader: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Filter Button (Only on Home Feed) */}
+        {currentTab === 'home' && (
+          <button
+            className={`relative flex items-center justify-center w-8 h-8 rounded-full border transition-all ${
+              hasActiveFilters
+                ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300 shadow-sm shadow-indigo-500/20'
+                : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:bg-white/10'
+            }`}
+            aria-label="Filtrele"
+            onClick={openFilterModal}
+            title="Etkinlik Filtreleri"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            {hasActiveFilters && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-indigo-400" />
+            )}
+          </button>
+        )}
+
         {/* Search */}
         <button
           className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"

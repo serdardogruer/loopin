@@ -16,11 +16,20 @@ export interface DiscoverySettings {
 interface DiscoveryState {
   settings: DiscoverySettings;
   isDiscoveryModalOpen: boolean;
+  isFilterModalOpen: boolean;
   viewMode: 'feed' | 'map';
+  selectedCategory: string;
+  selectedAgeRange: string;
+
   openDiscoveryModal: () => void;
   closeDiscoveryModal: () => void;
+  openFilterModal: () => void;
+  closeFilterModal: () => void;
   setViewMode: (mode: 'feed' | 'map') => void;
+  setSelectedCategory: (cat: string) => void;
+  setSelectedAgeRange: (age: string) => void;
   updateSettings: (newSettings: Partial<DiscoverySettings>) => void;
+  resetFilters: () => void;
 }
 
 export const useDiscoveryStore = create<DiscoveryState>()(
@@ -38,11 +47,19 @@ export const useDiscoveryStore = create<DiscoveryState>()(
         preferredLanguages: ['Türkçe', 'İngilizce'],
       },
       isDiscoveryModalOpen: false,
+      isFilterModalOpen: false,
       viewMode: 'feed',
+      selectedCategory: 'Tümü',
+      selectedAgeRange: 'Tüm Yaşlar',
 
-      openDiscoveryModal: () => set({ isDiscoveryModalOpen: true }),
+      openDiscoveryModal: () => set({ isDiscoveryModalOpen: true, isFilterModalOpen: false }),
       closeDiscoveryModal: () => set({ isDiscoveryModalOpen: false }),
+      openFilterModal: () => set({ isFilterModalOpen: true }),
+      closeFilterModal: () => set({ isFilterModalOpen: false }),
       setViewMode: (mode) => set({ viewMode: mode }),
+      setSelectedCategory: (cat) => set({ selectedCategory: cat }),
+      setSelectedAgeRange: (age) => set({ selectedAgeRange: age }),
+      resetFilters: () => set({ selectedCategory: 'Tümü', selectedAgeRange: 'Tüm Yaşlar', viewMode: 'feed' }),
       updateSettings: (newSettings) =>
         set((state) => ({
           settings: { ...state.settings, ...newSettings },
