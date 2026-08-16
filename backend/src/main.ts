@@ -42,7 +42,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT || 4000;
-  await app.listen(port);
-  console.log(`🚀 Loopin V2 API Server running on port ${port} (http://localhost:${port}/api/v1)`);
+  await app.listen(port, '0.0.0.0');
+  console.log(`🚀 Loopin V2 API Server running on port ${port} (http://0.0.0.0:${port}/api/v1)`);
 }
 bootstrap();
