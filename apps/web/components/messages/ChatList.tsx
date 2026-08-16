@@ -6,12 +6,37 @@ import { useChatStore } from '../../stores/useChatStore';
 export const ChatList: React.FC = () => {
   const { conversations, setActiveChatId } = useChatStore();
 
+  if (conversations.length === 0) {
+    return (
+      <div className="flex flex-col h-full bg-[#0A0A0A] p-4">
+        <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/10">
+          <h2 className="text-xl font-bold text-white font-['Outfit']">Mesajlar</h2>
+          <span className="text-xs font-semibold text-neutral-400 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+            0 Aktif
+          </span>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-3">
+          <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
+            💬
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-white font-['Outfit']">Henüz Bir Mesajınız Yok</h3>
+            <p className="text-xs text-neutral-400 mt-1 max-w-xs leading-relaxed">
+              Etkinliklere katılarak organizatörlerle ve katılımcılarla doğrudan mesajlaşmaya başlayabilirsiniz.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-[#0A0A0A] p-4 overflow-y-auto">
       <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/10">
         <h2 className="text-xl font-bold text-white font-['Outfit']">Mesajlar</h2>
         <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-          3 Aktif
+          {conversations.length} Aktif
         </span>
       </div>
 
