@@ -18,7 +18,7 @@ interface AuthState {
   setUser: (user: User) => void;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: typeof window !== 'undefined' ? localStorage.getItem('loopin_token') : null,
   isAuthenticated: false,
@@ -28,15 +28,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await authService.login(data);
-      const token = res.tokens?.accessToken || (res as any).accessToken;
+      const res: any = await authService.login(data);
+      const user = res?.user || res?.data?.user || res;
+      const token = res?.tokens?.accessToken || res?.data?.tokens?.accessToken || res?.accessToken;
+
       if (typeof window !== 'undefined' && token) {
         localStorage.setItem('loopin_token', token);
       }
+
       set({
-        user: res.user,
-        token,
-        isAuthenticated: true,
+        user: user?.id ? user : null,
+        token: token || null,
+        isAuthenticated: !!user?.id,
         isLoading: false,
       });
     } catch (err: any) {
@@ -48,15 +51,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   register: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await authService.register(data);
-      const token = res.tokens?.accessToken || (res as any).accessToken;
+      const res: any = await authService.register(data);
+      const user = res?.user || res?.data?.user || res;
+      const token = res?.tokens?.accessToken || res?.data?.tokens?.accessToken || res?.accessToken;
+
       if (typeof window !== 'undefined' && token) {
         localStorage.setItem('loopin_token', token);
       }
+
       set({
-        user: res.user,
-        token,
-        isAuthenticated: true,
+        user: user?.id ? user : null,
+        token: token || null,
+        isAuthenticated: !!user?.id,
         isLoading: false,
       });
     } catch (err: any) {
@@ -84,8 +90,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     try {
-      const user = await authService.getMe();
-      set({ user, token, isAuthenticated: true });
+      const res: any = await authService.getMe();
+      const user = res?.id ? res : (res?.data || null);
+      if (user && user.id) {
+        set({ user, token, isAuthenticated: true });
+      } else {
+        throw new Error('Geçersiz kullanıcı');
+      }
     } catch {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('loopin_token');

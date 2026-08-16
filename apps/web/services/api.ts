@@ -1,6 +1,8 @@
 // API Client Configuration for Loopin V2
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://loopin.codapi.site/api/v1';
+const API_BASE_URL = typeof window !== 'undefined' 
+  ? '/api/v1' 
+  : (process.env.NEXT_PUBLIC_API_URL || 'https://loopin.codapi.site/api/v1');
 
 export async function apiClient<T>(
   endpoint: string,
@@ -26,13 +28,19 @@ export async function apiClient<T>(
       headers,
     });
 
-    const data = await response.json().catch(() => ({}));
+    const json = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error(data.message || `API Hatası: ${response.status} ${response.statusText}`);
+      const errMsg = Array.isArray(json.message) ? json.message.join(', ') : json.message;
+      throw new Error(errMsg || `API Hatası: ${response.status} ${response.statusText}`);
     }
 
-    return data as T;
+    // Auto-unwrap NestJS standard { success: true, data: ... } format
+    if (json && typeof json === 'object' && 'data' in json && json.success === true) {
+      return json.data as T;
+    }
+
+    return json as T;
   } catch (error: any) {
     console.error(`[API Client Error] ${endpoint}:`, error);
     throw error;
