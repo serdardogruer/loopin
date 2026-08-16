@@ -9,6 +9,12 @@ import { eventsService } from '../../services/events.service';
 import { reelsService } from '../../services/reels.service';
 import { EventCategory, EventPriceType } from '@loopin/types';
 
+const EVENT_PRESETS = [
+  { label: '🎸 Konser', url: '/assets/event_concert.png' },
+  { label: '☕ Kahve', url: '/assets/event_coffee.png' },
+  { label: '🌲 Doğa', url: '/assets/reel_nature.png' },
+];
+
 export const CreateModal: React.FC = () => {
   const { isCreateModalOpen, closeCreateModal, setCurrentTab } = useUIStore();
   const { addEvent } = useEventsStore();
@@ -31,7 +37,7 @@ export const CreateModal: React.FC = () => {
   const [eventCapacity, setEventCapacity] = useState(10);
   const [eventPrice, setEventPrice] = useState<EventPriceType>('Herkes Kendi Öder');
   const [eventDesc, setEventDesc] = useState('');
-  const [eventPreview, setEventPreview] = useState<string | null>(null);
+  const [eventPreview, setEventPreview] = useState<string | null>('/assets/event_concert.png');
 
   if (!isCreateModalOpen) return null;
 
@@ -164,29 +170,32 @@ export const CreateModal: React.FC = () => {
                 <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
                   Fotoğraf veya Video
                 </label>
-                <div className="border-2 border-dashed border-white/10 hover:border-indigo-500/50 rounded-2xl p-4 text-center cursor-pointer transition-colors relative bg-[#0A0A0A]">
+                <div className="border-2 border-dashed border-white/15 hover:border-indigo-500/60 rounded-2xl p-4 text-center cursor-pointer relative bg-[#0A0A0A]">
                   <input
+                    id="reel-file-upload"
                     type="file"
                     accept="image/*,video/*"
                     onChange={(e) => handleFileUpload(e, true)}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    className="hidden"
                   />
-                  {reelPreview ? (
-                    <div className="relative aspect-[9/16] max-h-48 mx-auto rounded-xl overflow-hidden">
-                      <img src={reelPreview} alt="Preview" className="w-full h-full object-cover" />
-                      <span className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
-                        Değiştir
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="py-6 flex flex-col items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-lg">
-                        📤
+                  <label htmlFor="reel-file-upload" className="cursor-pointer block">
+                    {reelPreview ? (
+                      <div className="relative aspect-[9/16] max-h-52 mx-auto rounded-xl overflow-hidden shadow-lg border border-white/10">
+                        <img src={reelPreview} alt="Preview" className="w-full h-full object-cover" />
+                        <span className="absolute bottom-2 right-2 bg-indigo-600/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">
+                          Görseli Değiştir
+                        </span>
                       </div>
-                      <div className="text-xs text-neutral-300 font-medium">Medya Yükle</div>
-                      <div className="text-[10px] text-neutral-500">PNG, JPG, MP4 (Maks. 50MB)</div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="py-6 flex flex-col items-center gap-2">
+                        <div className="w-12 h-12 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-xl">
+                          📷
+                        </div>
+                        <div className="text-xs text-white font-bold">Galeriden veya Kameradan Seç</div>
+                        <div className="text-[10px] text-neutral-500">PNG, JPG, MP4 desteklenir</div>
+                      </div>
+                    )}
+                  </label>
                 </div>
               </div>
 
@@ -225,6 +234,59 @@ export const CreateModal: React.FC = () => {
                   className="w-full bg-[#0A0A0A] text-white text-xs px-3.5 py-2.5 rounded-xl border border-white/10 focus:border-indigo-500 outline-none"
                   required
                 />
+              </div>
+
+              {/* Event Image Upload & Presets */}
+              <div>
+                <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
+                  🖼️ Etkinlik Kapak Görseli
+                </label>
+                <div className="space-y-2">
+                  <div className="border-2 border-dashed border-white/15 hover:border-indigo-500/60 rounded-2xl p-3 text-center cursor-pointer bg-[#0A0A0A]">
+                    <input
+                      id="event-file-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, false)}
+                      className="hidden"
+                    />
+                    <label htmlFor="event-file-upload" className="cursor-pointer block">
+                      {eventPreview ? (
+                        <div className="relative h-28 mx-auto rounded-xl overflow-hidden shadow border border-white/10">
+                          <img src={eventPreview} alt="Preview" className="w-full h-full object-cover" />
+                          <span className="absolute bottom-2 right-2 bg-indigo-600/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow">
+                            Fotoğrafı Değiştir ✎
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="py-4 flex flex-col items-center gap-1.5">
+                          <div className="text-2xl">📁</div>
+                          <div className="text-xs text-white font-bold">Galeriden Fotoğraf Yükle</div>
+                          <div className="text-[10px] text-neutral-500">JPG, PNG veya WebP</div>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+
+                  {/* Preset Suggestions */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-neutral-400">Hazır Temalar:</span>
+                    {EVENT_PRESETS.map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => setEventPreview(preset.url)}
+                        className={`text-[10px] px-2 py-1 rounded-lg border transition-all ${
+                          eventPreview === preset.url
+                            ? 'bg-indigo-600 text-white border-indigo-500 font-bold'
+                            : 'bg-white/5 text-neutral-300 border-white/10 hover:bg-white/10'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
@@ -292,28 +354,6 @@ export const CreateModal: React.FC = () => {
                   className="w-full bg-[#0A0A0A] text-white text-xs px-3.5 py-2.5 rounded-xl border border-white/10 focus:border-indigo-500 outline-none"
                   required
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-neutral-300 mb-1">Kapak Görseli</label>
-                <div className="border border-dashed border-white/10 hover:border-indigo-500/50 rounded-xl p-2.5 text-center cursor-pointer relative bg-[#0A0A0A]">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, false)}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
-                  {eventPreview ? (
-                    <div className="relative h-24 mx-auto rounded-lg overflow-hidden">
-                      <img src={eventPreview} alt="Preview" className="w-full h-full object-cover" />
-                      <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded">
-                        Değiştir
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="text-xs text-neutral-400 py-2">Görsel seçmek için tıklayın</div>
-                  )}
-                </div>
               </div>
 
               <div>
