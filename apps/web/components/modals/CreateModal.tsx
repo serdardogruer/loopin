@@ -8,6 +8,7 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import { eventsService } from '../../services/events.service';
 import { reelsService } from '../../services/reels.service';
 import { EventCategory, EventPriceType } from '@loopin/types';
+import { compressImage } from '../../services/image';
 
 const EVENT_PRESETS = [
   { label: '🎸 Konser', url: '/assets/event_concert.png' },
@@ -41,15 +42,21 @@ export const CreateModal: React.FC = () => {
 
   if (!isCreateModalOpen) return null;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, isReel: boolean) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isReel: boolean) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (isReel) setReelPreview(event.target?.result as string);
-        else setEventPreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file, isReel ? 720 : 800, isReel ? 1280 : 600, 0.82);
+        if (isReel) setReelPreview(compressed);
+        else setEventPreview(compressed);
+      } catch {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (isReel) setReelPreview(event.target?.result as string);
+          else setEventPreview(event.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 

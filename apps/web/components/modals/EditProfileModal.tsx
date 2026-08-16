@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { usersService } from '../../services/users.service';
+import { compressImage } from '../../services/image';
 
 export const EditProfileModal: React.FC = () => {
   const { isEditProfileModalOpen, closeEditProfileModal } = useUIStore();
@@ -18,14 +19,19 @@ export const EditProfileModal: React.FC = () => {
 
   if (!isEditProfileModalOpen) return null;
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setAvatarPreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file, 400, 400, 0.85);
+        setAvatarPreview(compressed);
+      } catch {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setAvatarPreview(event.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
