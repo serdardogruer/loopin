@@ -137,6 +137,7 @@ export interface ReelItem {
   isLiked?: boolean;
   isFollowingPublisher?: boolean;
   isSelf?: boolean;
+  comments?: ReelComment[];
   createdAt: string | Date;
 }
 

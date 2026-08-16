@@ -7,6 +7,7 @@ interface ReelsState {
   setReels: (reels: ReelItem[]) => void;
   toggleLike: (id: string) => void;
   toggleFollow: (publisherId: string) => void;
+  addCommentToReel: (reelId: string, comment: any) => void;
   addReel: (reel: ReelItem) => void;
 }
 
@@ -36,6 +37,20 @@ export const useReelsStore = create<ReelsState>((set) => ({
           return {
             ...r,
             isFollowingPublisher: !r.isFollowingPublisher,
+          };
+        }
+        return r;
+      }),
+    })),
+
+  addCommentToReel: (reelId, comment) =>
+    set((state) => ({
+      reels: state.reels.map((r) => {
+        if (r.id === reelId) {
+          return {
+            ...r,
+            commentCount: r.commentCount + 1,
+            comments: [...(r.comments || []), comment],
           };
         }
         return r;

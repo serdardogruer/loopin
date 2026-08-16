@@ -5,7 +5,6 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import { useEventsStore } from '../../stores/useEventsStore';
 import { useReelsStore } from '../../stores/useReelsStore';
 import { useUIStore } from '../../stores/useUIStore';
-import { useDiscoveryStore } from '../../stores/useDiscoveryStore';
 import { FollowersModal } from '../modals/FollowersModal';
 
 export const ProfileHeader: React.FC = () => {
@@ -19,7 +18,7 @@ export const ProfileHeader: React.FC = () => {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="p-6 bg-[#141414] border-b border-white/10 text-center space-y-4">
+      <div className="p-6 bg-[#141A29] border-b border-white/10 text-center space-y-4">
         <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl mx-auto">
           👤
         </div>
@@ -48,123 +47,113 @@ export const ProfileHeader: React.FC = () => {
   };
 
   return (
-    <div className="p-4 bg-[#141414] border-b border-white/10 flex flex-col gap-3">
+    <div className="p-5 bg-gradient-to-b from-[#141A29] to-[#0D121F] border-b border-white/10 flex flex-col gap-4">
       {/* Top Row: Avatar & Stats */}
-      <div className="flex items-center justify-between">
-        <div className="relative">
+      <div className="flex items-center justify-between gap-4">
+        {/* Clickable Avatar to Edit Profile */}
+        <div
+          onClick={openEditProfileModal}
+          className="relative cursor-pointer group"
+          title="Fotoğrafı Değiştir / Profili Düzenle"
+        >
           <img
             src={user.avatarUrl || '/assets/profile_avatar.png'}
             alt="Profil"
-            className="w-16 h-16 rounded-full object-cover border-2 border-indigo-500 shadow-md"
+            className="w-16 h-16 rounded-full object-cover border-2 border-indigo-500 shadow-lg group-hover:opacity-85 transition-opacity"
           />
-          <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border border-[#141414] text-[10px] text-white flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">
+            ✎
+          </div>
+          <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#141A29] text-[9px] text-white flex items-center justify-center">
             ✓
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-center">
+        {/* Clean 3 Stat Cards */}
+        <div className="flex-1 flex items-center justify-around text-center">
           <button
             onClick={() => openFollowers('followers')}
-            className="hover:opacity-80 transition-opacity"
+            className="p-1 hover:opacity-80 transition-opacity"
           >
-            <div className="text-sm font-bold text-white font-['Outfit']">Takipçiler</div>
-            <div className="text-[10px] text-indigo-400 font-semibold">Bağlantılar</div>
+            <div className="text-base font-bold text-white font-['Outfit']">Takipçiler</div>
+            <div className="text-[11px] text-indigo-400 font-semibold">Bağlantılar</div>
           </button>
           <button
             onClick={() => openFollowers('following')}
-            className="hover:opacity-80 transition-opacity"
+            className="p-1 hover:opacity-80 transition-opacity"
           >
-            <div className="text-sm font-bold text-white font-['Outfit']">Takip</div>
-            <div className="text-[10px] text-neutral-400">Edilenler</div>
+            <div className="text-base font-bold text-white font-['Outfit']">Takip</div>
+            <div className="text-[11px] text-neutral-400 font-medium">Edilenler</div>
           </button>
-          <div>
-            <div className="text-sm font-bold text-amber-400 font-['Outfit']">
-              {user.creditBalance ?? 10} 🪙
+          <div className="p-1">
+            <div className="text-base font-bold text-amber-400 font-['Outfit'] flex items-center justify-center gap-1">
+              <span>{user.creditBalance ?? 10}</span>
+              <span className="text-xs">🪙</span>
             </div>
-            <div className="text-[10px] text-amber-400 font-semibold">Kredi</div>
+            <div className="text-[11px] text-amber-400/90 font-semibold">Kredi Bakiyesi</div>
           </div>
         </div>
       </div>
 
-      {/* Bio Row */}
+      {/* Name, Username & Bio */}
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <h3 className="text-base font-bold text-white font-['Outfit']">{user.name}</h3>
+          <h2 className="text-lg font-bold text-white font-['Outfit']">{user.name}</h2>
           {user.isPro && (
             <span className="px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-orange-500 text-black text-[9px] font-extrabold shadow-sm">
               PRO
             </span>
           )}
+          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+            🛡️ %98 Güven Skoru
+          </span>
         </div>
-        <div className="text-xs text-neutral-400 font-medium">@{user.username || user.email}</div>
-        <p className="text-xs text-neutral-300 leading-relaxed pt-1">
-          {user.bio || 'Henüz bir biyografi eklenmedi.'}
+        <div className="text-xs text-indigo-400 font-medium">@{user.username || user.email}</div>
+        <p className="text-xs text-neutral-300 leading-relaxed pt-0.5">
+          {user.bio || 'Henüz bir biyografi eklenmedi. "Profili Düzenle" butonundan kendinizi tanıtabilirsiniz.'}
         </p>
       </div>
 
-      {/* Badges & Counters */}
-      <div className="flex flex-wrap items-center gap-2 pt-1">
-        <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] text-neutral-300 font-medium flex items-center gap-1">
-          <span>🛡️</span> %98 Güven Skoru
-        </span>
-        <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] text-neutral-300 font-medium flex items-center gap-1">
-          <span>🎉</span> {userEventsCount} Etkinlik
-        </span>
-        <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] text-neutral-300 font-medium flex items-center gap-1">
-          <span>📷</span> {userReelsCount} Reel
-        </span>
-      </div>
-
-      {/* Rich Lifestyle Badges & Photo Strip */}
+      {/* Clean Lifestyle & Interest Tags (Subtle) */}
       {((user as any)?.zodiac || (user as any)?.languages || (user as any)?.lookingFor || (user as any)?.interests?.length > 0) && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
+        <div className="flex flex-wrap gap-1.5 pt-0.5">
           {(user as any)?.zodiac && (
-            <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-300 font-semibold">
+            <span className="px-2.5 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-300 font-semibold">
               🌙 {(user as any).zodiac}
             </span>
           )}
           {(user as any)?.lookingFor && (
-            <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-300 font-semibold">
+            <span className="px-2.5 py-0.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-[10px] text-purple-300 font-semibold">
               👁️ {(user as any).lookingFor}
             </span>
           )}
           {(user as any)?.languages && (
-            <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-300 font-semibold">
+            <span className="px-2.5 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[10px] text-blue-300 font-semibold">
               🌐 {(user as any).languages}
             </span>
           )}
-          {(user as any)?.occupation && (
-            <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-300 font-semibold">
-              💼 {(user as any).occupation}
-            </span>
-          )}
           {(user as any)?.interests?.slice(0, 3).map((tag: string) => (
-            <span key={tag} className="px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] text-neutral-300 font-semibold">
+            <span key={tag} className="px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] text-neutral-300 font-medium">
               {tag}
             </span>
           ))}
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2 pt-2">
+      {/* Action Buttons: 1 Direct "Profili Düzenle" + 1 Clean Settings Button */}
+      <div className="flex items-center gap-2 pt-1">
         <button
           onClick={openEditProfileModal}
-          className="flex-1 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-xs font-bold shadow-md shadow-indigo-500/20 active:scale-95"
+          className="flex-1 py-2.5 rounded-2xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-xs font-bold shadow-md shadow-indigo-500/25 active:scale-95 flex items-center justify-center gap-1.5 transition-all"
         >
-          Profili Düzenle
+          <span>✏️</span>
+          <span>Profili Düzenle</span>
         </button>
-        <button
-          onClick={() => useDiscoveryStore.getState().openDiscoveryModal()}
-          className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-neutral-200 text-xs font-bold border border-white/10 flex items-center gap-1 active:scale-95 transition-all"
-          title="Keşif Ayarları"
-        >
-          <span>🧭</span> Keşif Ayarları
-        </button>
+
         <button
           onClick={openSettingsModal}
-          className="p-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 hover:text-white border border-white/10 active:scale-95"
-          title="Ayarlar"
+          className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border border-white/10 active:scale-95 flex items-center justify-center transition-all"
+          title="Ayarlar & Çıkış"
         >
           <svg
             width="18"

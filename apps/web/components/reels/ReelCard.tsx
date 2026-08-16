@@ -15,7 +15,7 @@ export interface ReelCardProps {
 
 export const ReelCard: React.FC<ReelCardProps> = ({ reel, isFirstCard }) => {
   const { toggleLike, toggleFollow } = useReelsStore();
-  const { openCommentsDrawer, openProfileSheet } = useUIStore();
+  const { openCommentsDrawer, openReelCommentsDrawer, openProfileSheet } = useUIStore();
   const { user } = useAuthStore();
 
   const isOwnReel = reel.isSelf || (user && user.id === reel.publisherId);
@@ -68,7 +68,7 @@ export const ReelCard: React.FC<ReelCardProps> = ({ reel, isFirstCard }) => {
           className="side-action-btn"
           onClick={(e) => {
             e.stopPropagation();
-            alert(`💬 ${reel.publisherName} adlı kullanıcının paylaşımında ${reel.commentCount} yorum bulunmaktadır.`);
+            openReelCommentsDrawer(reel.id);
           }}
         >
           <div className="btn-icon-circle">

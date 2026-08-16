@@ -28,7 +28,9 @@ interface UIState {
 
   // Comments Drawer
   activeCommentsEventId: string | null;
+  activeCommentsReelId: string | null;
   openCommentsDrawer: (eventId: string) => void;
+  openReelCommentsDrawer: (reelId: string) => void;
   closeCommentsDrawer: () => void;
 
   // Auth Modal
@@ -73,8 +75,10 @@ export const useUIStore = create<UIState>((set) => ({
   closeDetailModal: () => set({ detailItem: null }),
 
   activeCommentsEventId: null,
-  openCommentsDrawer: (eventId) => set({ activeCommentsEventId: eventId }),
-  closeCommentsDrawer: () => set({ activeCommentsEventId: null }),
+  activeCommentsReelId: null,
+  openCommentsDrawer: (eventId) => set({ activeCommentsEventId: eventId, activeCommentsReelId: null }),
+  openReelCommentsDrawer: (reelId) => set({ activeCommentsReelId: reelId, activeCommentsEventId: null }),
+  closeCommentsDrawer: () => set({ activeCommentsEventId: null, activeCommentsReelId: null }),
 
   isAuthModalOpen: false,
   authModalMode: 'login',
