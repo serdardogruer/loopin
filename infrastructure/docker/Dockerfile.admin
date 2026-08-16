@@ -9,6 +9,9 @@ COPY packages/ ./packages/
 
 RUN pnpm install --frozen-lockfile=false
 
+RUN pnpm --filter "@loopin/validation" build
+RUN pnpm --filter "@loopin/utils" build
+
 COPY apps/admin/ ./apps/admin/
 RUN mkdir -p apps/admin/public
 RUN pnpm --filter @loopin/admin build
@@ -23,5 +26,6 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/admin ./apps/admin
 
+WORKDIR /app/apps/admin
 EXPOSE 3001
-CMD ["pnpm", "--filter", "@loopin/admin", "start"]
+CMD ["npm", "run", "start"]
